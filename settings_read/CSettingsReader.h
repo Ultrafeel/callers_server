@@ -29,7 +29,7 @@ public:
 		 */
 	};
 
-	void OpenAndRead();
+	bool OpenAndRead();
 
 	std::string m_path;
 	typedef std::map<std::string, std::string > TParsed;
