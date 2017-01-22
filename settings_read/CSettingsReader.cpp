@@ -47,7 +47,7 @@ string trimWhitesp(string const & str)
 	auto e = std::find_if(b, str.end(), isspaceM );
 	return string(b, e);
 }
-char delimiter1 = '=';
+const char delimiter1 = '=';
 bool CSettingsReader::OpenAndRead()
 {
 	m_file.open(m_path.c_str());

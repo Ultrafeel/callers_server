@@ -3,6 +3,7 @@
 	<name>caller_client</name>
 	<comment></comment>
 	<projects>
+		<project>settings_read</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
