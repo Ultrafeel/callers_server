@@ -36,3 +36,4 @@
 [Dd]ebug*/
 *.lib
 [Rr]elease*/
+*.layout
