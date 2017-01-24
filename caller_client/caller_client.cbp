@@ -12,8 +12,12 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 				</Compiler>
+				<Environment>
+					<Variable name="currconf" value="Debug" />
+				</Environment>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/caller_client" prefix_auto="1" extension_auto="1" />
@@ -26,13 +30,27 @@
 				<Linker>
 					<Add option="-s" />
 				</Linker>
+				<Environment>
+					<Variable name="currconf" value="Release" />
+				</Environment>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="../settings_read" />
+			<Add directory="/usr/share/boost_extr/boost_1_63_0/boost" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Linker>
+			<Add option="-lsettings_read" />
+			<Add option="-lpthread" />
+			<Add option="-lboost_thread" />
+			<Add option="-lboost_system" />
+			<Add option="-lboost_regex" />
+			<Add directory="../settings_read/$(currconf)" />
+			<Add directory="/usr/share/boost_extr/boost_1_63_0/stage/lib" />
+		</Linker>
+		<Unit filename="src/caller_client.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
