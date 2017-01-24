@@ -25,8 +25,10 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1532422004" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1215141330" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/settings_read}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/share/boost_extr/boost_1_63_0/boost"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.dialect.std.438475387" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.438475387" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.other.verbose.1960255865" name="Verbose (-v)" superClass="gnu.cpp.compiler.option.other.verbose" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1812560754" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.738752090" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -41,9 +43,14 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1130886289" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.825944749" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/settings_read/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/share/boost_extr/boost_1_63_0/boost"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.138077205" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="settings_read"/>
+									<listOptionValue builtIn="false" value="settings_read"/>
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="boost_thread"/>
+									<listOptionValue builtIn="false" value="boost_regex"/>
+									<listOptionValue builtIn="false" value="boost_system"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.65586520" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
