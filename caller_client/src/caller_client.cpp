@@ -15,7 +15,7 @@ using boost::asio::ip::tcp;
 using namespace std;
 
 int main() {
-	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	cout << "!!!Hello Cl!!!" << endl; // prints !!!Hello World!!!
 	char const * cfgP = "config_cl.cfg";
 	CSettingsReader cfg(cfgP);
 	bool res = cfg.OpenAndRead();
@@ -30,7 +30,7 @@ int main() {
         std::cout << " cfg wrong . Port not Found in : " << cfgP << " "   << '\n';
         return 1;
     }
-
+///
    // cfg.m_parsedInt.find("port")
      auto itServAddr = cfg.m_parsed.find("server_addr");//[;
     //auto search = example(2);
