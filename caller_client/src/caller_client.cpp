@@ -34,5 +34,8 @@ int main() {
     cout << " cfg  Server  to use   : " <<  itServAddr->second << " "   << '\n';
 
     cout << " cfg  Port  to use   : " <<  itPort->second << " "   << '\n';
+
+
+
 	return 0;
 }
