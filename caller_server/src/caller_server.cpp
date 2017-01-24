@@ -7,8 +7,13 @@
 //============================================================================
 
 #include <iostream>
+
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include "CSettingsReader.h"
 using namespace std;
+using namespace boost;
+using boost::asio::ip::tcp;
 
 int main() {
 	cout << "!!!Hello Server!!" << endl; // prints !!!Hello Server!!
@@ -27,5 +32,10 @@ int main() {
         return 1;
     }
     cout << " cfg  Port  to use   : " <<  itPort->second << " "   << '\n';
+
+    asio::io_service io_service;
+
+
+
 	return 0;
 }
