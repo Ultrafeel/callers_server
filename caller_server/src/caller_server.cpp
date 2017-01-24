@@ -15,6 +15,19 @@ using namespace std;
 using namespace boost;
 using boost::asio::ip::tcp;
 
+#include <boost/asio.hpp>
+
+using boost::asio::ip::tcp;
+
+std::string make_daytime_string()
+{
+  using namespace std; // For time_t, time and ctime;
+
+  return "wow!";
+}
+
+
+
 int main() {
 	cout << "!!!Hello Server!!" << endl; // prints !!!Hello Server!!
 
@@ -33,8 +46,28 @@ int main() {
     }
     cout << " cfg  Port  to use   : " <<  itPort->second << " "   << '\n';
 
-    asio::io_service io_service;
 
+  try
+  {
+    boost::asio::io_service io_service;
+
+    tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), itPort->second));
+
+    for (;;)
+    {
+      tcp::socket socket(io_service);
+      acceptor.accept(socket);
+
+      std::string message = make_daytime_string();
+
+      boost::system::error_code ignored_error;
+      boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+    }
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
 
 
 	return 0;
