@@ -14,27 +14,31 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
-int main() {
-	cout << "!!!Hello Cl!!!" << endl; // prints !!!Hello World!!!
-	char const * cfgP = "config_cl.cfg";
-	CSettingsReader cfg(cfgP);
-	bool res = cfg.OpenAndRead();
-    if(!res) { //cfg.m_file.rdbuf()->
+int main()
+{
+    cout << "!!!Hello Cl!!!" << endl; // prints !!!Hello World!!!
+    char const * cfgP = "config_cl.cfg";
+    CSettingsReader cfg(cfgP);
+    bool res = cfg.OpenAndRead();
+    if(!res)   //cfg.m_file.rdbuf()->
+    {
         std::cout << " cfg wrong .  "   << '\n';
         return 1;
     }
     auto itPort = cfg.m_parsedInt.find("port");//[;
     auto itPortStr = cfg.m_parsed.find("port");//[;
     //auto search = example(2);
-    if(itPort == cfg.m_parsedInt.end()) { //cfg.m_file.rdbuf()->
+    if(itPort == cfg.m_parsedInt.end())   //cfg.m_file.rdbuf()->
+    {
         std::cout << " cfg wrong . Port not Found in : " << cfgP << " "   << '\n';
         return 1;
     }
 ///
-   // cfg.m_parsedInt.find("port")
-     auto itServAddr = cfg.m_parsed.find("server_addr");//[;
+    // cfg.m_parsedInt.find("port")
+    auto itServAddr = cfg.m_parsed.find("server_addr");//[;
     //auto search = example(2);
-    if(itServAddr == cfg.m_parsed.end()) { //cfg.m_file.rdbuf()->
+    if(itServAddr == cfg.m_parsed.end())   //cfg.m_file.rdbuf()->
+    {
         std::cout << " cfg wrong . server_addr not Found in : " << cfgP << " "   << '\n';
         return 1;
     }
@@ -49,8 +53,16 @@ int main() {
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     tcp::socket socket(io_service);
-    boost::asio::connect(socket, endpoint_iterator);
 
-
+    try
+    {
+        boost::asio::connect(socket, endpoint_iterator);
+        cout << " Connected " << std::endl;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Connection to caller_server failed: " << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
