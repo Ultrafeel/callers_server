@@ -37,3 +37,5 @@
 *.lib
 [Rr]elease*/
 *.layout
+caller_client/caller_client.bmarks
+*.bmarks

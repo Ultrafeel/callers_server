@@ -50,6 +50,12 @@
 			<Add directory="../settings_read/$(currconf)" />
 			<Add directory="/usr/share/boost_extr/boost_1_63_0/stage/lib" />
 		</Linker>
+		<ExtraCommands>
+			<Add after='echo &quot;(TARGET_OUTPUT_FILE) is $(TARGET_OUTPUT_FILE)&quot;' />
+			<Add after='echo  &quot;(TARGET_OUTPUT_FILENAME) is $(TARGET_OUTPUT_FILENAME)&quot;' />
+			<Add after="pwd" />
+			<Add after='chmod +x &quot;./$(TARGET_OUTPUT_FILE)&quot;' />
+		</ExtraCommands>
 		<Unit filename="src/caller_client.cpp" />
 		<Extensions>
 			<code_completion />
