@@ -47,15 +47,15 @@ int main()
     cout << " cfg  Port  to use   : " <<  itPort->second << " (" << itPortStr->second  << ")\n";
 
     asio::io_service io_service;
-
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query(itServAddr->second, itPortStr->second);
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-    tcp::socket socket(io_service);
-
     try
     {
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(itServAddr->second, itPortStr->second);
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+        tcp::socket socket(io_service);
+
+
         boost::asio::connect(socket, endpoint_iterator);
         cout << " Connected " << std::endl;
     }

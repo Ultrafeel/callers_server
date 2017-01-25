@@ -44,6 +44,12 @@ public:
 
   void start()
   {
+    std::vector<char> buff;
+    boost::asio::async_read(socket_, boost::asio::buffer(buff),
+        boost::bind(&tcp_connection::handle_read, shared_from_this(),
+          boost::asio::placeholders::error
+          ,boost::asio::placeholders::bytes_transferred()
+                    ));
     message_ = make_daytime_string();
 
     boost::asio::async_write(socket_, boost::asio::buffer(message_),
@@ -63,6 +69,11 @@ private:
   {
   }
 
+  void handle_read(const boost::system::error_code& /*error*/
+                 ,
+      size_t  /* bytes_transferred*/)
+  {
+  }
   tcp::socket socket_;
   std::string message_;
 };
