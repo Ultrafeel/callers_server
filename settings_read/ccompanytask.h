@@ -8,19 +8,28 @@
 //__cdecl
 size_t  strnlen_sm(const char *str, size_t maxsize);
 
-class CCompanyTask
+struct TCompanyTask
 {
-public:
-    CCompanyTask();
-    virtual ~CCompanyTask();
-
-
     std::string m_comp_name;
     uint16_t            m_priority;
     std::string  m_advertise;
 
     std::deque<std::string> m_abonents;
+};
+class CCompanyTask : public TCompanyTask
+{
+public:
+    CCompanyTask();
+    CCompanyTask(TCompanyTask const & ct):TCompanyTask(ct) {};
+    virtual ~CCompanyTask();
 
+//
+//    std::string m_comp_name;
+//    uint16_t            m_priority;
+//    std::string  m_advertise;
+//
+//    std::deque<std::string> m_abonents;
+      enum {  max_message_length = 111 };
     template <typename Archive>
     void serialize(Archive& ar, int version)
     {

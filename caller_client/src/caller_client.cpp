@@ -21,13 +21,18 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
-#include "chat_message.hpp"
 //#include <boost/array.hpp>
 #include <CSettingsReader.h>
+#include <cserverstatus.h>
+#include <ccompanytask.h>
+#include <connection.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/deque.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 using boost::asio::ip::tcp;
 
-typedef std::deque<chat_message> chat_message_queue;
+typedef std::deque<CCompanyTask> companies_queue;
 
 class chat_client
 {
@@ -37,12 +42,12 @@ public:
         : io_service_(io_service),
           socket_(io_service)
     {
-        boost::asio::async_connect(socket_, endpoint_iterator,
+        boost::asio::async_connect(socket_.socket(), endpoint_iterator,
                                    boost::bind(&chat_client::handle_connect, this,
                                                boost::asio::placeholders::error));
     }
 
-    void write(const chat_message& msg)
+    void write(const CCompanyTask& msg)
     {
         io_service_.post(boost::bind(&chat_client::do_write, this, msg));
     }
@@ -58,8 +63,8 @@ private:
     {
         if (!error)
         {
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+            socket_.async_read(
+                                   read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                                     boost::bind(&chat_client::handle_read_header, this,
                                                 boost::asio::placeholders::error));
         }
@@ -67,27 +72,12 @@ private:
 
     void handle_read_header(const boost::system::error_code& error)
     {
-        if (!error && read_msg_.decode_header())
+        if (!error)// && read_msg_.decode_header())
         {
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                                    boost::bind(&chat_client::handle_read_body, this,
-                                                boost::asio::placeholders::error));
-        }
-        else
-        {
-            do_close();
-        }
-    }
-
-    void handle_read_body(const boost::system::error_code& error)
-    {
-        if (!error)
-        {
-            std::cout.write(read_msg_.body(), read_msg_.body_length());
-            std::cout << "\n";
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+           using namespace std;
+           cout << "currently :" <<  read_msg_.message << endl;
+           socket_.async_read(
+                                   read_msg_ ,//boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
                                     boost::bind(&chat_client::handle_read_header, this,
                                                 boost::asio::placeholders::error));
         }
@@ -97,15 +87,32 @@ private:
         }
     }
 
-    void do_write(chat_message msg)
+//    void handle_read_body(const boost::system::error_code& error)
+//    {
+//        if (!error)
+//        {
+//            std::cout.write(read_msg_.body(), read_msg_.body_length());
+//            std::cout << "\n";
+//               socket_.async_read(
+//                                    read_msg_,//boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+//                                    boost::bind(&chat_client::handle_read_header, this,
+//                                                boost::asio::placeholders::error));
+//        }
+//        else
+//        {
+//            do_close();
+//        }
+//    }
+
+    void do_write(CCompanyTask msg)
     {
         bool write_in_progress = !write_msgs_.empty();
         write_msgs_.push_back(msg);
         if (!write_in_progress)
         {
-            boost::asio::async_write(socket_,
-                                     boost::asio::buffer(write_msgs_.front().data(),
-                                             write_msgs_.front().length()),
+           socket_.async_write(
+                                    write_msgs_.front(),// boost::asio::buffer(write_msgs_.front().data(),
+                                            // write_msgs_.front().length()),
                                      boost::bind(&chat_client::handle_write, this,
                                                  boost::asio::placeholders::error));
         }
@@ -118,9 +125,9 @@ private:
             write_msgs_.pop_front();
             if (!write_msgs_.empty())
             {
-                boost::asio::async_write(socket_,
-                                         boost::asio::buffer(write_msgs_.front().data(),
-                                                 write_msgs_.front().length()),
+               socket_.async_write(
+                                        write_msgs_.front() ,//boost::asio::buffer(write_msgs_.front().data(),
+                                              //   write_msgs_.front().length()),
                                          boost::bind(&chat_client::handle_write, this,
                                                      boost::asio::placeholders::error));
             }
@@ -133,14 +140,15 @@ private:
 
     void do_close()
     {
-        socket_.close();
+        socket_.socket().close();
     }
 
 private:
     boost::asio::io_service& io_service_;
-    tcp::socket socket_;
-    chat_message read_msg_;
-    chat_message_queue write_msgs_;
+    //tcp::socket
+    s11n_example::connection socket_;
+    CServerStatus read_msg_;
+    companies_queue write_msgs_;
 };
 
 using namespace std;
@@ -192,14 +200,16 @@ int main()
 
         boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-        char line[chat_message::max_body_length + 1];
-        while (std::cin.getline(line, chat_message::max_body_length + 1))
+        char line[CCompanyTask::max_message_length + 1];
+        while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
         {
             using namespace std; // For strlen and memcpy.
-            chat_message msg;
-            msg.body_length(strlen(line));
-            memcpy(msg.body(), line, msg.body_length());
-            msg.encode_header();
+            CCompanyTask msg=
+
+             TCompanyTask { line };
+//            msg.body_length(strlen(line));
+//            memcpy(msg.body(), line, msg.body_length());
+//            msg.encode_header();
             c.write(msg);
         }
 
