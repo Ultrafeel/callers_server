@@ -47,6 +47,7 @@
 			<Add option="-lboost_thread" />
 			<Add option="-lboost_system" />
 			<Add option="-lboost_regex" />
+			<Add option="-lboost_serialization" />
 			<Add directory="../settings_read/$(currconf)" />
 			<Add directory="/usr/share/boost_extr/boost_1_63_0/stage/lib" />
 		</Linker>
