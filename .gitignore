@@ -39,3 +39,4 @@
 *.layout
 caller_client/caller_client.bmarks
 *.bmarks
+*.depend
