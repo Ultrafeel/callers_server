@@ -33,28 +33,28 @@ typedef std::deque<chat_message> chat_message_queue;
 
 //----------------------------------------------------------------------
 
-class chat_participant
+class client_app
 {
 public:
-    virtual ~chat_participant() {}
+    virtual ~client_app() {}
     virtual void deliver(const chat_message& msg) = 0;
 };
 
-typedef boost::shared_ptr<chat_participant> chat_participant_ptr;
+typedef boost::shared_ptr<client_app> client_app_ptr;
 
 //----------------------------------------------------------------------
 
-class chat_room
+class caller_executor
 {
 public:
-    void join(chat_participant_ptr participant)
+    void join(client_app_ptr participant)
     {
         participants_.insert(participant);
         std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
-                      boost::bind(&chat_participant::deliver, participant, _1));
+                      boost::bind(&client_app::deliver, participant, _1));
     }
 
-    void leave(chat_participant_ptr participant)
+    void leave(client_app_ptr participant)
     {
         participants_.erase(participant);
     }
@@ -66,11 +66,11 @@ public:
             recent_msgs_.pop_front();
 
         std::for_each(participants_.begin(), participants_.end(),
-                      boost::bind(&chat_participant::deliver, _1, boost::ref(msg)));
+                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
 
 private:
-    std::set<chat_participant_ptr> participants_;
+    std::set<client_app_ptr> participants_;
     enum { max_recent_msgs = 100 };
     chat_message_queue recent_msgs_;
 };
@@ -78,13 +78,13 @@ private:
 //----------------------------------------------------------------------
 
 class chat_session
-    : public chat_participant,
+    : public client_app,
       public boost::enable_shared_from_this<chat_session>
 {
 public:
-    chat_session(boost::asio::io_service& io_service, chat_room& room)
+    chat_session(boost::asio::io_service& io_service, caller_executor& room)
         : socket_(io_service),
-          room_(room)
+          m_caller(room)
     {
     }
 
@@ -95,7 +95,7 @@ public:
 
     void start()
     {
-        room_.join(shared_from_this());
+        m_caller.join(shared_from_this());
         boost::asio::async_read(socket_,
                                 boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                                 boost::bind(
@@ -128,7 +128,7 @@ public:
         }
         else
         {
-            room_.leave(shared_from_this());
+            m_caller.leave(shared_from_this());
         }
     }
 
@@ -136,7 +136,7 @@ public:
     {
         if (!error)
         {
-            room_.deliver(read_msg_);
+            m_caller.deliver(read_msg_);
             boost::asio::async_read(socket_,
                                     boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                                     boost::bind(&chat_session::handle_read_header, shared_from_this(),
@@ -144,7 +144,7 @@ public:
         }
         else
         {
-            room_.leave(shared_from_this());
+            m_caller.leave(shared_from_this());
         }
     }
 
@@ -164,13 +164,13 @@ public:
         }
         else
         {
-            room_.leave(shared_from_this());
+            m_caller.leave(shared_from_this());
         }
     }
 
 private:
     tcp::socket socket_;
-    chat_room& room_;
+    caller_executor& m_caller;
     chat_message read_msg_;
     chat_message_queue write_msgs_;
 };
@@ -192,7 +192,7 @@ public:
 
     void start_accept()
     {
-        chat_session_ptr new_session(new chat_session(io_service_, room_));
+        chat_session_ptr new_session(new chat_session(io_service_, m_caller));
         acceptor_.async_accept(new_session->socket(),
                                boost::bind(&chat_server::handle_accept, this, new_session,
                                            boost::asio::placeholders::error));
@@ -212,7 +212,7 @@ public:
 private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
-    chat_room room_;
+    caller_executor m_caller;
 };
 
 //typedef boost::shared_ptr<chat_server> chat_server_ptr;
