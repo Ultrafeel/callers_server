@@ -6,12 +6,13 @@ class CServerStatus
 {
     public:
         CServerStatus();
+        CServerStatus(std::string const& str): message(str){};
         virtual ~CServerStatus();
 
         std::string message;
 
     template <typename Archive>
-    void serialize(Archive& ar, const unsigned int version)
+    void serialize(Archive& ar, int version)
     {
         ar & message;
     }

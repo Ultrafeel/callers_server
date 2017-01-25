@@ -22,14 +22,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include "ccompanytask.h"
+#include "cserverstatus.h"
+#include "connection.hpp" // Must come before boost/serialization headers.
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/deque.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include "chat_message.hpp"
 #include "CSettingsReader.h"
-#include "ccompanytask.h"
+
 using boost::asio::ip::tcp;
 
 //----------------------------------------------------------------------
 
-typedef std::deque<chat_message> chat_message_queue;
+typedef std::deque<CServerStatus> server_status_queue;
 
 //----------------------------------------------------------------------
 
@@ -37,13 +43,14 @@ class client_app
 {
 public:
     virtual ~client_app() {}
-    virtual void deliver(const chat_message& msg) = 0;
+    virtual void deliver(const CServerStatus& msg) = 0;
 };
 
 typedef boost::shared_ptr<client_app> client_app_ptr;
 
 //----------------------------------------------------------------------
-
+using namespace std;
+ char  const * endMessage = "/n end";
 class caller_executor : public boost::noncopyable
 {
 
@@ -54,32 +61,41 @@ class caller_executor : public boost::noncopyable
     friend class call_server;
 public:
 
+
     void join(client_app_ptr participant)
     {
         m_client_app = (participant);
-        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
-                      boost::bind(&client_app::deliver, participant, _1));
+//        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
+//                      boost::bind(&client_app::deliver, participant, _1));
     }
 
     void leave(client_app_ptr participant)
     {
-        m_client_app.erase(participant);
+        m_client_app .reset(); //erase(participant);
     }
     void CallCompanyTask(CCompanyTask const& ct)
     {
 
-            for (auto& us : ct.m_users)
+            m_client_app->deliver(CServerStatus(ct.m_comp_name));
+            cout <<ct.m_comp_name  ;
+            size_t iu = 1;
+            for (auto& us : ct.m_abonents)
             {
+               cout << ++iu << " abonent " << us;
 
+               m_client_app->deliver(CServerStatus(us));
             }
+            m_client_app->deliver(CServerStatus(endMessage));
     }
 
-    void deliver(const chat_message& msg)
+    void deliver(const CCompanyTask& msg)
     {
-        recent_msgs_.push_back(msg);
-        while (recent_msgs_.size() > max_recent_msgs)
-            recent_msgs_.pop_front();
-        m_client_app->deliver(msg);
+        CallCompanyTask(msg);
+
+//        recent_msgs_.push_back(msg);
+//        while (recent_msgs_.size() > max_recent_msgs)
+//            recent_msgs_.pop_front();
+//        m_client_app->deliver(msg);
 //        std::for_each(m_client_app.begin(), m_client_app.end(),
 //                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
@@ -88,7 +104,7 @@ private:
     client_app_ptr  m_client_app;
     //std::set<client_app_ptr> m_client_app;
     enum { max_recent_msgs = 100 };
-    chat_message_queue recent_msgs_;
+   // server_status_queue recent_msgs_;
 };
 
 //----------------------------------------------------------------------
@@ -106,28 +122,29 @@ public:
 
     tcp::socket& socket()
     {
-        return socket_;
+        return socket_.socket();
     }
 
     void start()
     {
         m_caller.join(shared_from_this());
-        boost::asio::async_read(socket_,
-                                boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+        //boost::asio::
+            socket_.async_read(read_msg_,
+                               // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                                 boost::bind(
                                     &client_listen_session::handle_read_header, shared_from_this(),
                                     boost::asio::placeholders::error));
     }
 
-    void deliver(const chat_message& msg)
+    void deliver(const CServerStatus& msg)
     {
         bool write_in_progress = !write_msgs_.empty();
         write_msgs_.push_back(msg);
         if (!write_in_progress)
         {
-            boost::asio::async_write(socket_,
-                                     boost::asio::buffer(write_msgs_.front().data(),
-                                             write_msgs_.front().length()),
+            socket_.async_write(
+                                   write_msgs_.front(),//  boost::asio::buffer(write_msgs_.front().data(),
+                                            // write_msgs_.front().length()),
                                      boost::bind(&client_listen_session::handle_write, shared_from_this(),
                                                  boost::asio::placeholders::error));
         }
@@ -135,26 +152,10 @@ public:
 
     void handle_read_header(const boost::system::error_code& error)
     {
-        if (!error && read_msg_.decode_header())
+        if (!error  )
         {
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                                    boost::bind(&client_listen_session::handle_read_body, shared_from_this(),
-                                                boost::asio::placeholders::error));
-        }
-        else
-        {
-            m_caller.leave(shared_from_this());
-        }
-    }
-
-    void handle_read_body(const boost::system::error_code& error)
-    {
-        if (!error)
-        {
-            m_caller.deliver(read_msg_);
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+            socket_.async_read(
+                                   read_msg_,// boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
                                     boost::bind(&client_listen_session::handle_read_header, shared_from_this(),
                                                 boost::asio::placeholders::error));
         }
@@ -163,20 +164,41 @@ public:
             m_caller.leave(shared_from_this());
         }
     }
+//
+//    void handle_read_body(const boost::system::error_code& error)
+//    {
+//        if (!error)
+//        {
+//            m_caller.deliver(read_msg_);
+//
+//            socket_.async_read( task //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+//                                    boost::bind(&client_listen_session::handle_read_header, shared_from_this(),
+//                                                boost::asio::placeholders::error));
+//        }
+//        else
+//        {
+//            m_caller.leave(shared_from_this());
+//        }
+//    }
 
     void handle_write(const boost::system::error_code& error)
     {
         if (!error)
         {
+            bool isEnd = (!write_msgs_.empty() && endMessage != write_msgs_.front().message);
+
             write_msgs_.pop_front();
+            //loop while write_msgs_ not empty
             if (!write_msgs_.empty())
             {
-                boost::asio::async_write(socket_,
-                                         boost::asio::buffer(write_msgs_.front().data(),
-                                                 write_msgs_.front().length()),
+               socket_.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
+                                              //   write_msgs_.front().length()),
                                          boost::bind(&client_listen_session::handle_write, shared_from_this(),
                                                      boost::asio::placeholders::error));
             }
+
+            if (isEnd)
+                m_caller.leave(shared_from_this());
         }
         else
         {
@@ -185,10 +207,13 @@ public:
     }
 
 private:
-    tcp::socket socket_;
+   // tcp::socket
+
+    s11n_example::connection socket_;
     caller_executor& m_caller;
-    chat_message read_msg_;
-    chat_message_queue write_msgs_;
+    CCompanyTask read_msg_;
+   // chat_message read_msg_;
+    server_status_queue write_msgs_;
 };
 
 typedef boost::shared_ptr<client_listen_session> chat_session_ptr;
@@ -270,6 +295,10 @@ int main()
     {
         std::cerr << e.what() << std::endl;
     }
-
+//boost::archive::text_iarchive_impl<boost::archive::text_iarchive> ar;
     return 0;
 }
+//boost::archive::text_iarchive
+
+///usr/include/boost/archive/text_iarchive.hpp
+//boost::archive::text_iarchive_impl

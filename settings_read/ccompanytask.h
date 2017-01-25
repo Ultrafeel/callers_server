@@ -16,13 +16,18 @@ public:
 
 
     std::string m_comp_name;
-    std::deque<std::string> m_users;
+    uint16_t            m_priority;
+    std::string  m_advertise;
+
+    std::deque<std::string> m_abonents;
 
     template <typename Archive>
-    void serialize(Archive& ar, const unsigned int version)
+    void serialize(Archive& ar, int version)
     {
         ar & m_comp_name;
-        ar & m_users;
+        ar & m_priority;
+        ar & m_advertise;
+        ar & m_abonents;
     }
 //    unsigned char m_usCount;
 //    void decode(char const * data, size_t length);

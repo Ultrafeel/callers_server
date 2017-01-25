@@ -72,8 +72,14 @@ public:
 
     // Write the serialized data to the socket. We use "gather-write" to send
     // both the header and the data in a single write operation.
-    std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back(boost::asio::buffer(outbound_header_));
+   // std::vector<
+//    boost::asio::const_buffer buffers[2] =
+// {boost::asio::buffer(outbound_header_),
+//  boost::asio::buffer(outbound_data_)};
+   std::vector<boost::asio::const_buffer> buffers;
+   buffers.reserve(2);
+//
+   buffers.push_back(boost::asio::buffer(outbound_header_));
     buffers.push_back(boost::asio::buffer(outbound_data_));
     boost::asio::async_write(socket_, buffers, handler);
   }
@@ -102,6 +108,8 @@ public:
   {
     if (e)
     {
+        //A tuple (or n-tuple) is a fixed size collection of elements
+        //boost::get — Retrieves 0 element.
       boost::get<0>(handler)(e);
     }
     else
