@@ -41,6 +41,7 @@
 		<Unit filename="CSettingsReader.h" />
 		<Unit filename="ccompanytask.cpp" />
 		<Unit filename="ccompanytask.h" />
+		<Unit filename="chat_message.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
