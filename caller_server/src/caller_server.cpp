@@ -24,7 +24,7 @@
 #include <boost/asio.hpp>
 #include "chat_message.hpp"
 #include "CSettingsReader.h"
-
+#include "ccompanytask.h"
 using boost::asio::ip::tcp;
 
 //----------------------------------------------------------------------
@@ -44,19 +44,34 @@ typedef boost::shared_ptr<client_app> client_app_ptr;
 
 //----------------------------------------------------------------------
 
-class caller_executor
+class caller_executor : public boost::noncopyable
 {
+
+    caller_executor()
+    {
+
+    }
+    friend class call_server;
 public:
+
     void join(client_app_ptr participant)
     {
-        participants_.insert(participant);
+        m_client_app = (participant);
         std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
                       boost::bind(&client_app::deliver, participant, _1));
     }
 
     void leave(client_app_ptr participant)
     {
-        participants_.erase(participant);
+        m_client_app.erase(participant);
+    }
+    void CallCompanyTask(CCompanyTask const& ct)
+    {
+
+            for (auto& us : ct.m_users)
+            {
+
+            }
     }
 
     void deliver(const chat_message& msg)
@@ -64,25 +79,26 @@ public:
         recent_msgs_.push_back(msg);
         while (recent_msgs_.size() > max_recent_msgs)
             recent_msgs_.pop_front();
-
-        std::for_each(participants_.begin(), participants_.end(),
-                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
+        m_client_app->deliver(msg);
+//        std::for_each(m_client_app.begin(), m_client_app.end(),
+//                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
 
 private:
-    std::set<client_app_ptr> participants_;
+    client_app_ptr  m_client_app;
+    //std::set<client_app_ptr> m_client_app;
     enum { max_recent_msgs = 100 };
     chat_message_queue recent_msgs_;
 };
 
 //----------------------------------------------------------------------
 
-class chat_session
+class client_listen_session
     : public client_app,
-      public boost::enable_shared_from_this<chat_session>
+      public boost::enable_shared_from_this<client_listen_session>
 {
 public:
-    chat_session(boost::asio::io_service& io_service, caller_executor& room)
+    client_listen_session(boost::asio::io_service& io_service, caller_executor& room)
         : socket_(io_service),
           m_caller(room)
     {
@@ -99,7 +115,7 @@ public:
         boost::asio::async_read(socket_,
                                 boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                                 boost::bind(
-                                    &chat_session::handle_read_header, shared_from_this(),
+                                    &client_listen_session::handle_read_header, shared_from_this(),
                                     boost::asio::placeholders::error));
     }
 
@@ -112,7 +128,7 @@ public:
             boost::asio::async_write(socket_,
                                      boost::asio::buffer(write_msgs_.front().data(),
                                              write_msgs_.front().length()),
-                                     boost::bind(&chat_session::handle_write, shared_from_this(),
+                                     boost::bind(&client_listen_session::handle_write, shared_from_this(),
                                                  boost::asio::placeholders::error));
         }
     }
@@ -123,7 +139,7 @@ public:
         {
             boost::asio::async_read(socket_,
                                     boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                                    boost::bind(&chat_session::handle_read_body, shared_from_this(),
+                                    boost::bind(&client_listen_session::handle_read_body, shared_from_this(),
                                                 boost::asio::placeholders::error));
         }
         else
@@ -139,7 +155,7 @@ public:
             m_caller.deliver(read_msg_);
             boost::asio::async_read(socket_,
                                     boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                                    boost::bind(&chat_session::handle_read_header, shared_from_this(),
+                                    boost::bind(&client_listen_session::handle_read_header, shared_from_this(),
                                                 boost::asio::placeholders::error));
         }
         else
@@ -158,7 +174,7 @@ public:
                 boost::asio::async_write(socket_,
                                          boost::asio::buffer(write_msgs_.front().data(),
                                                  write_msgs_.front().length()),
-                                         boost::bind(&chat_session::handle_write, shared_from_this(),
+                                         boost::bind(&client_listen_session::handle_write, shared_from_this(),
                                                      boost::asio::placeholders::error));
             }
         }
@@ -175,14 +191,14 @@ private:
     chat_message_queue write_msgs_;
 };
 
-typedef boost::shared_ptr<chat_session> chat_session_ptr;
+typedef boost::shared_ptr<client_listen_session> chat_session_ptr;
 
 //----------------------------------------------------------------------
 
-class chat_server
+class call_server
 {
 public:
-    chat_server(boost::asio::io_service& io_service,
+    call_server(boost::asio::io_service& io_service,
                 const tcp::endpoint& endpoint)
         : io_service_(io_service),
           acceptor_(io_service, endpoint)
@@ -192,9 +208,9 @@ public:
 
     void start_accept()
     {
-        chat_session_ptr new_session(new chat_session(io_service_, m_caller));
+        chat_session_ptr new_session(new client_listen_session(io_service_, m_caller));
         acceptor_.async_accept(new_session->socket(),
-                               boost::bind(&chat_server::handle_accept, this, new_session,
+                               boost::bind(&call_server::handle_accept, this, new_session,
                                            boost::asio::placeholders::error));
     }
 
@@ -247,7 +263,7 @@ int main()
     {
         boost::asio::io_service io_service;
         tcp::endpoint endpoint(tcp::v4(), itPort->second);
-        chat_server server(io_service, endpoint);
+        call_server server(io_service, endpoint);
         io_service.run();
     }
     catch (std::exception& e)
