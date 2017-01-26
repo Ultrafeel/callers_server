@@ -8,13 +8,25 @@
 //__cdecl
 size_t  strnlen_sm(const char *str, size_t maxsize);
 
+class CAbonent final
+{
+public:
+    std::string m_name;
+    std::string m_number;
+    template <typename Archive>
+    void serialize(Archive& ar, int version)
+    {
+        ar & m_name ;
+        ar & m_number;
+    }
+}
 struct TCompanyTask
 {
     std::string m_comp_name;
     uint16_t            m_priority;
     std::string  m_advertise;
 
-    std::deque<std::string> m_abonents;
+    std::deque<CAbonent> m_abonents;
 };
 class CCompanyTask : public TCompanyTask
 {

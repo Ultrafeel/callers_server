@@ -31,6 +31,9 @@ public:
 
 	bool OpenAndRead();
 
+    static std::string trimWhitesp(std::string const & str);
+       static const char  delimiter1 = '=';
+
 	std::string m_path;
 	typedef std::map<std::string, std::string > TParsed;
 	TParsed m_parsed;
