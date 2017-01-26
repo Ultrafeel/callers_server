@@ -71,7 +71,7 @@ public:
 
     void leave(client_app_ptr participant)
     {
-        // m_client_app .reset(); //erase(participant);
+          m_client_app .reset(); //erase(participant);
     }
     void CallCompanyTask(CCompanyTask const& ct)
     {
@@ -132,6 +132,10 @@ public:
     {
         m_caller.join(shared_from_this());
         //boost::asio::
+        async_read_msg();
+    }
+    void async_read_msg()
+    {
         socket_.async_read(read_msg_,
                            // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                            boost::bind(
@@ -158,10 +162,7 @@ public:
         if (!error  )
         {
             m_caller.CallCompanyTask(read_msg_);
-            socket_.async_read(
-                read_msg_,// boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                boost::bind(&client_listen_session::handle_read_header, shared_from_this(),
-                            boost::asio::placeholders::error));
+            async_read_msg();//<recursion
         }
         else
         {
@@ -213,7 +214,7 @@ public:
 private:
     // tcp::socket
 
-    s11n_example::connection socket_;
+    serialize_sock::connection socket_;
     caller_executor& m_caller;
     CCompanyTask read_msg_;
     // chat_message read_msg_;

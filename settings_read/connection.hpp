@@ -22,7 +22,7 @@
 #include <sstream>
 #include <vector>
 
-namespace s11n_example {
+namespace serialize_sock {
 
 /// The connection class provides serialization primitives on top of a socket.
 /**

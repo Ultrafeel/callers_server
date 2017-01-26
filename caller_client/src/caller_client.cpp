@@ -34,27 +34,27 @@ using boost::asio::ip::tcp;
 
 typedef std::deque<CCompanyTask> companies_queue;
 
-class chat_client
+class Caller_client
 {
 public:
-    chat_client(boost::asio::io_service& io_service,
+    Caller_client(boost::asio::io_service& io_service,
                 tcp::resolver::iterator endpoint_iterator)
         : io_service_(io_service),
           socket_(io_service)
     {
         boost::asio::async_connect(socket_.socket(), endpoint_iterator,
-                                   boost::bind(&chat_client::handle_connect, this,
+                                   boost::bind(&Caller_client::handle_connect, this,
                                                boost::asio::placeholders::error));
     }
 
     void write(const CCompanyTask& msg)
     {
-        io_service_.post(boost::bind(&chat_client::do_write, this, msg));
+        io_service_.post(boost::bind(&Caller_client::do_write, this, msg));
     }
 
     void close()
     {
-        io_service_.post(boost::bind(&chat_client::do_close, this));
+        io_service_.post(boost::bind(&Caller_client::do_close, this));
     }
 
 private:
@@ -65,7 +65,7 @@ private:
         {
             socket_.async_read(
                                    read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                                    boost::bind(&chat_client::handle_read_header, this,
+                                    boost::bind(&Caller_client::handle_read_header, this,
                                                 boost::asio::placeholders::error));
         }
     }
@@ -78,7 +78,7 @@ private:
            cout << "currently :" <<  read_msg_.message << endl;
            socket_.async_read(
                                    read_msg_ ,//boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                                    boost::bind(&chat_client::handle_read_header, this,
+                                    boost::bind(&Caller_client::handle_read_header, this,
                                                 boost::asio::placeholders::error));
         }
         else
@@ -113,7 +113,7 @@ private:
            socket_.async_write(
                                     write_msgs_.front(),// boost::asio::buffer(write_msgs_.front().data(),
                                             // write_msgs_.front().length()),
-                                     boost::bind(&chat_client::handle_write, this,
+                                     boost::bind(&Caller_client::handle_write, this,
                                                  boost::asio::placeholders::error));
         }
     }
@@ -128,7 +128,7 @@ private:
                socket_.async_write(
                                         write_msgs_.front() ,//boost::asio::buffer(write_msgs_.front().data(),
                                               //   write_msgs_.front().length()),
-                                         boost::bind(&chat_client::handle_write, this,
+                                         boost::bind(&Caller_client::handle_write, this,
                                                      boost::asio::placeholders::error));
             }
         }
@@ -146,7 +146,7 @@ private:
 private:
     boost::asio::io_service& io_service_;
     //tcp::socket
-    s11n_example::connection socket_;
+    serialize_sock::connection socket_;
     CServerStatus read_msg_;
     companies_queue write_msgs_;
 };
@@ -154,7 +154,7 @@ private:
 using namespace std;
 int main()
 {
-    cout << "!!!Hello Cl!!!" << endl; // prints !!!Hello World!!!
+    cout << "!!!Hello Client!!!" << endl; // prints !!!Hello World!!!
     char const * cfgP = "config_cl.cfg";
     CSettingsReader cfg(cfgP);
     bool res = cfg.OpenAndRead();
@@ -195,7 +195,7 @@ int main()
 
         tcp::resolver::iterator iterator = resolver.resolve(query);
 
-        chat_client c(io_service, iterator);
+        Caller_client c(io_service, iterator);
         cout << " Connected " << std::endl;
 
         boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
