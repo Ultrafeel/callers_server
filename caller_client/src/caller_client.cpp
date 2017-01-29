@@ -154,15 +154,27 @@ private:
 };
 
 using namespace std;
-int main()
+int main(int argc, char* argv[])
 {
-    cout << "!!!Hello Client!!!" << endl; // prints !!!Hello World!!!
+
+    char const * compTasks = "companies_test.info";
+
+    // Check command line arguments.
+    if (argc > 2)
+    {
+      std::cerr << "Usage: caller_client \"<companies file name>\"" << std::endl;
+      return 1;
+    }
+    else if (argc == 2)
+    {   compTasks = argv[1];    }
+
+    cout << "!!!Hello Client!!! Used companies file: \"" << compTasks << "\"" << endl; // prints !!!Hello World!!!
     char const * cfgP = "config_cl.cfg";
     CSettingsReader cfg(cfgP);
     bool res = cfg.OpenAndRead();
     if(!res)   //cfg.m_file.rdbuf()->
     {
-        std::cout << " cfg wrong .  "   << '\n';
+        std::cout << " cfg " << cfgP <<" wrong .  "   << '\n';
         return 1;
     }
     auto itPort = cfg.m_parsedInt.find("port");//[;
@@ -187,7 +199,6 @@ int main()
     cout << " cfg  Port  to use   : " <<  itPort->second << " (" << itPortStr->second  << ")\n";
 
 
-    char const * compTasks = "companies_test.info";
     CCompaniesReader cr(compTasks);
     cr.OpenAndReadTasks();
 
