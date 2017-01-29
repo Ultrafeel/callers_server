@@ -29,7 +29,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/deque.hpp>
 #include <boost/archive/text_iarchive.hpp>
-
+#include "../ccompaniesreader.h"
 using boost::asio::ip::tcp;
 
 typedef std::deque<CCompanyTask> companies_queue;
@@ -184,6 +184,10 @@ int main()
 
     cout << " cfg  Port  to use   : " <<  itPort->second << " (" << itPortStr->second  << ")\n";
 
+
+       char const * compTasks = "companies_test.info";
+       CCompaniesReader cr(compTasks);
+       cr.OpenAndReadTasks2();
 
     try
     {

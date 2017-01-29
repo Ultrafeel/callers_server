@@ -57,6 +57,8 @@
 			<Add after="pwd" />
 			<Add after='chmod +x &quot;./$(TARGET_OUTPUT_FILE)&quot;' />
 		</ExtraCommands>
+		<Unit filename="ccompaniesreader.cpp" />
+		<Unit filename="ccompaniesreader.h" />
 		<Unit filename="src/caller_client.cpp" />
 		<Extensions>
 			<code_completion />

@@ -19,7 +19,8 @@ public:
         ar & m_name ;
         ar & m_number;
     }
-}
+};
+
 struct TCompanyTask
 {
     std::string m_comp_name;
