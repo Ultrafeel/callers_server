@@ -10,7 +10,6 @@ class CCompaniesReader : public CSettingsReader
         CCompaniesReader(char const* path);
         virtual ~CCompaniesReader();
         bool OpenAndReadTasks();
-        bool OpenAndReadTasks2();
 
         std::deque<CCompanyTask> m_tasks;
     protected:

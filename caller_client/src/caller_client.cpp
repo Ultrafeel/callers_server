@@ -38,7 +38,7 @@ class Caller_client
 {
 public:
     Caller_client(boost::asio::io_service& io_service,
-                tcp::resolver::iterator endpoint_iterator)
+                  tcp::resolver::iterator endpoint_iterator)
         : io_service_(io_service),
           socket_(io_service)
     {
@@ -63,10 +63,12 @@ private:
     {
         if (!error)
         {
+            std::cout << " Connected " << std::endl;
+
             socket_.async_read(
-                                   read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                                    boost::bind(&Caller_client::handle_read_header, this,
-                                                boost::asio::placeholders::error));
+                read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+                boost::bind(&Caller_client::handle_read_header, this,
+                            boost::asio::placeholders::error));
         }
     }
 
@@ -74,12 +76,12 @@ private:
     {
         if (!error)// && read_msg_.decode_header())
         {
-           using namespace std;
-           cout << "currently :" <<  read_msg_.message << endl;
-           socket_.async_read(
-                                   read_msg_ ,//boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                                    boost::bind(&Caller_client::handle_read_header, this,
-                                                boost::asio::placeholders::error));
+            using namespace std;
+            cout << "currently :" <<  read_msg_.message << endl;
+            socket_.async_read(
+                read_msg_, //boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
+                boost::bind(&Caller_client::handle_read_header, this,
+                            boost::asio::placeholders::error));
         }
         else
         {
@@ -110,11 +112,11 @@ private:
         write_msgs_.push_back(msg);
         if (!write_in_progress)
         {
-           socket_.async_write(
-                                    write_msgs_.front(),// boost::asio::buffer(write_msgs_.front().data(),
-                                            // write_msgs_.front().length()),
-                                     boost::bind(&Caller_client::handle_write, this,
-                                                 boost::asio::placeholders::error));
+            socket_.async_write(
+                write_msgs_.front(),// boost::asio::buffer(write_msgs_.front().data(),
+                // write_msgs_.front().length()),
+                boost::bind(&Caller_client::handle_write, this,
+                            boost::asio::placeholders::error));
         }
     }
 
@@ -125,11 +127,11 @@ private:
             write_msgs_.pop_front();
             if (!write_msgs_.empty())
             {
-               socket_.async_write(
-                                        write_msgs_.front() ,//boost::asio::buffer(write_msgs_.front().data(),
-                                              //   write_msgs_.front().length()),
-                                         boost::bind(&Caller_client::handle_write, this,
-                                                     boost::asio::placeholders::error));
+                socket_.async_write(
+                    write_msgs_.front(), //boost::asio::buffer(write_msgs_.front().data(),
+                    //   write_msgs_.front().length()),
+                    boost::bind(&Caller_client::handle_write, this,
+                                boost::asio::placeholders::error));
             }
         }
         else
@@ -185,9 +187,9 @@ int main()
     cout << " cfg  Port  to use   : " <<  itPort->second << " (" << itPortStr->second  << ")\n";
 
 
-       char const * compTasks = "companies_test.info";
-       CCompaniesReader cr(compTasks);
-       cr.OpenAndReadTasks2();
+    char const * compTasks = "companies_test.info";
+    CCompaniesReader cr(compTasks);
+    cr.OpenAndReadTasks();
 
     try
     {
@@ -200,17 +202,15 @@ int main()
         tcp::resolver::iterator iterator = resolver.resolve(query);
 
         Caller_client c(io_service, iterator);
-        cout << " Connected " << std::endl;
 
         boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-        char line[CCompanyTask::max_message_length + 1];
-        while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
+        // char line[CCompanyTask::max_message_length + 1];
+        // while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
+        for ( CCompanyTask & msg : cr.m_tasks)
         {
-            using namespace std; // For strlen and memcpy.
-            CCompanyTask msg=
-
-             TCompanyTask { line };
+           // using namespace std; // For strlen and memcpy.
+            //CCompanyTask msg=  TCompanyTask { line };
 //            msg.body_length(strlen(line));
 //            memcpy(msg.body(), line, msg.body_length());
 //            msg.encode_header();

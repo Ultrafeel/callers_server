@@ -25,122 +25,50 @@ enum ParserState
 char const * keywordTask = "[Task]";
 char const * KeywordUser = "[User]";
 using namespace std;
-bool CCompaniesReader::OpenAndReadTasks2()
-{
-    boost::property_tree::ptree pt;
-    boost::property_tree::info_parser::read_info(m_path, pt);// "config.ini",
-    auto p =  pt.get<std::string>("Task.Users.");
-    std::cout << p << std::endl;
-    p =  pt.get<std::string>("Task.Users.");
-      std::cout << p << std::endl;
 
-    std::cout << pt.get<std::string>("Section1.Value2") << std::endl;
-    return true;
-}
+
 bool CCompaniesReader::OpenAndReadTasks()
 {
-
-
-    m_file.open(m_path.c_str());
-    if(!m_file.is_open())
+    auto m_path = "companies_test.info";
+    using namespace boost::property_tree;
+    boost::property_tree::ptree pt;
+    boost::property_tree::info_parser::read_info(m_path, pt);// "config.ini",
+    auto p =  pt.get_optional<std::string>("Task.Users.");
+    if (p)
+        std::cout << *p << std::endl;
+    auto companies = pt.get_child_optional("companies"); //""<std::string>
+    if (companies)
     {
-        cout << "no settings file" << endl;
-        return false;
-    }
-    std::string str;
-    ParserState state = Empty;
-    while (m_file.good())
-    {
-        getline(m_file,str);
-
-        string key0 = trimWhitesp(str);
-        if (keywordTask      == key0)
+        for (ptree::const_iterator itComp = companies->begin(); itComp != companies->end(); ++itComp)
         {
-            state = ReadTask;
-        }
-        if (KeywordUser     == key0)
-        {
-            state = ReadUser;
-        }
-        else
-            return false;
+            m_tasks.resize(m_tasks.size() + 1);
+            CCompanyTask& company = m_tasks.back();
 
+            // auto p2  =  pt.get_child_optional("");//<std::string>
 
-        switch (state)
-        {
-        case Empty:
-        {
-            string key = trimWhitesp(str);
-            if (keywordTask      == key)
-                state = ReadTask;
-            else
-                return false;
-
-
-
-        }
-        case ReadTask:
-//go through
-        case ReadUser:
-        {
-
-            auto split1 =str.find(delimiter1);
-            if (split1 == string::npos)
+            //   get("---")    for (ptree::const_iterator  nid= p2->begin(); nid != p2->end(); )
+            company.m_comp_name = itComp->first;
+            std::cout << " comp name:" << itComp->first << std::endl;
+            company.m_priority = itComp->second.get("priority", 0);
+            std::cout << " comp priority: " <<  company.m_priority  << std::endl;
+            company.m_advertise = itComp->second.get("adv", "--");
+            std::cout << " comp adv: " << company.m_advertise << std::endl;
+            auto users = itComp->second.get_child_optional("Users"); //""<std::string>
+            if (users)
             {
-                continue;
-            }
-                auto itDelim =  str.begin() + split1;
-                string key0 (str.begin(), itDelim);
-                string key = trimWhitesp(key0);
-           CCompanyTask & comp = m_tasks.back();
-            if (ReadTask == state)
-            {
-                 if (itDelim != str.end())
-                    ++itDelim;
-                else
-                    return false;
-
-                string value( itDelim, str.end());
-                char * pEnd = 0;
-                string valueT = trimWhitesp(value);
-
-
-                if ("Name"      == key)
-                    comp.m_comp_name = value;
-                else if ("Priority" == key)
+                company.m_abonents.resize(company.m_abonents.size() + 1);
+                CAbonent & abon =  company.m_abonents.back();
+                for (ptree::const_iterator itUser = users->begin(); itUser != users->end(); ++itUser)
                 {
-                    auto i = strtol(value.c_str(), &pEnd, 10);
-                    if (pEnd && pEnd > value.c_str())
-                    {
-                        comp.m_priority = i; //m_parsedInt.insert( make_pair( key, i));
-                    }
-                    else
-                        return false;
+                    abon.m_name = itUser->first;
+                    abon.m_number = itUser->second.get_value(" no num!!") ;
+                    std::cout << " user name:" <<  abon.m_name << std::endl;//second.get("adv", "-no adv!-")
 
+                    std::cout << " user num: " << abon.m_number << std::endl;
                 }
-                else if ("Advertise" == key)
-                    comp.m_advertise = value;
-            m_parsed.insert(make_pair (key, value));
-            auto i = strtol(value.c_str(), &pEnd, 10);
-            if (pEnd && pEnd > value.c_str())
-            {
-                m_parsedInt.insert( make_pair( key, i));
+
             }
-                   }
-            else
-            {
-                comp.m_abonents.resize(comp.m_abonents.size() + 1);
-               // CAbonent & abon = comp.m_abonents.back();
-//            if (keywordUser      == key)
-//                                      state = ReadUser;
-               // if ("Name" == key)
-
-
-                }
-
         }
-        }
-        break;
     }
     return true;
 }
