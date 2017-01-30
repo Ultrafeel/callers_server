@@ -18,6 +18,7 @@
 #include <iostream>
 #include <list>
 #include <set>
+#include <queue>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -82,11 +83,11 @@ public:
         cout <<ct.m_comp_name << endl ;
         m_client_app->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
         size_t iu = 1;
-        for (auto& us : ct.m_abonents)
+        for (CAbonent const& us : ct.m_abonents)
         {
-            cout << ++iu << " abonent " << us<< endl;
+            cout << ++iu << " abonent " << us.m_name << endl;
 
-            m_client_app->deliver(CServerStatus(us));
+            m_client_app->deliver(CServerStatus(us.m_name ));
         }
         m_client_app->deliver(CServerStatus(endMessage));
     }
@@ -136,7 +137,8 @@ public:
     }
     void async_read_msg()
     {
-        socket_.async_read(read_msg_,
+        current_companyTask.reset(new CCompanyTask());
+        socket_.async_read(*current_companyTask,
                            // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                            boost::bind(
                                &client_listen_session::handle_read_header, shared_from_this(),
@@ -161,8 +163,18 @@ public:
     {
         if (!error  )
         {
-            m_caller.CallCompanyTask(read_msg_);
-            async_read_msg();//<recursion
+
+            {
+
+
+                std::lock_guard<std::mutex> lock(m_queue_m);
+                read_queue.emplace(*current_companyTask.release());
+           }
+            socket_
+            m_caller.CallCompanyTask()
+                m_caller.CallCompanyTask(read_queue.top());
+                read_queue.pop();
+             async_read_msg();//<recursion
         }
         else
         {
@@ -210,13 +222,30 @@ public:
             m_caller.leave(shared_from_this());
         }
     }
-
+   struct CompaniesSorter
+   {
+    bool operator () (CCompanyTask const & t1, CCompanyTask const & t2) const
+    {
+        if (t1.m_priority > t2.m_priority)
+            return true;
+        else if(t1.m_priority != t2.m_priority)
+            return false;
+        else
+        {
+            bool result = (t1.m_abonents.size() < t2.m_abonents.size());
+            return result;
+        }
+    }
+   };
 private:
+
     // tcp::socket
 
     serialize_sock::connection socket_;
+    std::mutex m_queue_m;
     caller_executor& m_caller;
-    CCompanyTask read_msg_;
+    std::unique_ptr<CCompanyTask> current_companyTask;
+    std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter> read_queue;
     // chat_message read_msg_;
     server_status_queue write_msgs_;
 };
