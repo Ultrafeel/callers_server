@@ -41,14 +41,14 @@ typedef std::deque<CServerStatus> server_status_queue;
 
 //----------------------------------------------------------------------
 
-class client_app
+class CInteractor
 {
 public:
-    virtual ~client_app() {}
+    virtual ~CInteractor() {}
     virtual void deliver(const CServerStatus& msg) = 0;
 };
 
-typedef boost::shared_ptr<client_app> client_app_ptr;
+typedef boost::shared_ptr<CInteractor> CInteractor_ptr;
 
 //----------------------------------------------------------------------
 using namespace std;
@@ -72,7 +72,7 @@ struct CompaniesSorter
 struct CTask_to_handle
 {
     CCompanyTask m_task;
-    client_app_ptr m_client;
+    CInteractor_ptr m_client;
 };
 struct CHandleTaskSorter
 {
@@ -83,6 +83,14 @@ struct CHandleTaskSorter
 private:
     CompaniesSorter m_cs;
 };
+
+
+class call_executor
+    : public CInteractor,
+      public boost::enable_shared_from_this<client_listen_session>
+{
+};
+
 class caller_executor_pool : public boost::noncopyable
 {
 
@@ -95,49 +103,49 @@ class caller_executor_pool : public boost::noncopyable
 public:
 
 
-    void join(client_app_ptr participant)
+    void join(CInteractor_ptr participant)
     {
         // m_client_app = (participant);
 //        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
 //                      boost::bind(&client_app::deliver, participant, _1));
     }
 
-    void leave(client_app_ptr participant)
+    void leave(CInteractor_ptr participant)
     {
         // m_client_app .reset(); //erase(participant);
     }
     void CallCompanyTask(CTask_to_handle const& th)
     {
-        client_app_ptr  client_app = th.m_client;
-        if (client_app.get())
+        CInteractor_ptr  CInteractor = th.m_client;
+        if (CInteractor.get())
             return;
 
         CCompanyTask  const& ct = th.m_task;
         cout << "task ";
         cout <<ct.m_comp_name << endl ;
-        client_app->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
+        CInteractor->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
         size_t iu = 1;
         for (CAbonent const& us : ct.m_abonents)
         {
             cout << ++iu << " abonent " << us.m_name << endl;
 
-            client_app->deliver(CServerStatus(us.m_name ));
+            CInteractor->deliver(CServerStatus(us.m_name ));
         }
         bool tasks_left = false;
-        client_app->deliver(CServerStatus(endMessage));
+        CInteractor->deliver(CServerStatus(endMessage));
         for (CTask_to_handle const& thi : read_queue)
         {
-            if (thi.m_client.get() == client_app.get())
+            if (thi.m_client.get() == CInteractor.get())
                 tasks_left= true;
         }
         if (tasks_left)
-            client_app->deliver(CServerStatus("All tasks end"));
+            CInteractor->deliver(CServerStatus("All tasks end"));
         else
-            client_app->deliver(CServerStatus("Have some your tasks"));
+            CInteractor->deliver(CServerStatus("Have some your tasks"));
 
     }
 
-    void deliver(CCompanyTask&& msg, client_app_ptr client)
+    void deliver(CCompanyTask&& msg, CInteractor_ptr client)
     {
 
        {
@@ -163,7 +171,7 @@ public:
     }
 private:
     //client_app_ptr  m_client_app;
-    std::set<client_app_ptr> m_client_app;
+    std::set<CInteractor_ptr> m_client_app;
     enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
@@ -177,7 +185,7 @@ private:
 //----------------------------------------------------------------------
 
 class client_listen_session
-    : public client_app,
+    : public CInteractor,
       public boost::enable_shared_from_this<client_listen_session>
 {
 public:
@@ -228,7 +236,7 @@ public:
         {
 
             {
-                 m_caller.deliver(*current_companyTask.release() ,client_app_ptr( this->shared_from_this()) );
+                 m_caller.deliver(*current_companyTask.release() ,CInteractor_ptr( this->shared_from_this()) );
 
             }
             //m_socket.
