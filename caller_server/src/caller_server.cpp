@@ -83,10 +83,10 @@ struct CHandleTaskSorter
 private:
     CompaniesSorter m_cs;
 };
-class caller_executor : public boost::noncopyable
+class caller_executor_pool : public boost::noncopyable
 {
 
-    caller_executor( boost::asio::io_service & io_service_):
+    caller_executor_pool( boost::asio::io_service & io_service_):
         m_io_service(io_service_)
     {
 
@@ -151,7 +151,7 @@ public:
 //        while (recent_msgs_.size() > max_recent_msgs)
 //            recent_msgs_.pop_front();
 //        m_client_app->deliver(msg);
-        m_io_service.post(boost::bind(& caller_executor::Proc, this));
+        m_io_service.post(boost::bind(& caller_executor_pool::Proc, this));
 //        std::for_each(m_client_app.begin(), m_client_app.end(),
 //                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
@@ -181,7 +181,7 @@ class client_listen_session
       public boost::enable_shared_from_this<client_listen_session>
 {
 public:
-    client_listen_session(boost::asio::io_service& io_service, caller_executor& room)
+    client_listen_session(boost::asio::io_service& io_service, caller_executor_pool& room)
         : m_socket(io_service),
           m_caller(room)
     {
@@ -289,7 +289,7 @@ private:
     // tcp::socket
 
     serialize_sock::connection m_socket;
-    caller_executor& m_caller;
+    caller_executor_pool& m_caller;
     std::unique_ptr<CCompanyTask> current_companyTask;
     // chat_message read_msg_;
     server_status_queue write_msgs_;
@@ -332,7 +332,7 @@ public:
 private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
-    caller_executor m_caller;
+    caller_executor_pool m_caller;
 };
 
 //typedef boost::shared_ptr<chat_server> chat_server_ptr;
