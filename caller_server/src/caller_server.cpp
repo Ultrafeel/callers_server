@@ -82,7 +82,7 @@ class caller_executor_pool : public boost::noncopyable
 {
 
     caller_executor_pool( boost::asio::io_service & io_service_):
-        m_io_service(io_service_)
+      m_call_executor() , m_io_service(io_service_)
     {
 
     }
@@ -162,6 +162,7 @@ private:
     enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
+    call_executor m_call_executor;
     //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
    // std::set<CCompanyTask, CompaniesSorter>
     std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
@@ -228,7 +229,9 @@ public:
             }
             //m_socket.
            // m_caller.CallCompanyTask()
-            m_caller.CallCompanyTask(read_queue.top());
+
+           // m_caller.CallCompanyTask(read_queue.top());
+
             //read_queue.pop();
            // async_read_msg();//<recursion
         }
@@ -300,9 +303,9 @@ public:
     call_server(boost::asio::io_service& io_service,
                 const tcp::endpoint& endpoint)
         : io_service_(io_service),
-          acceptor_(io_service, endpoint), caller_executor_pool(io_service)
+          acceptor_(io_service, endpoint), m_caller(io_service)//caller_executor_pool
     {
-        io_service_
+       // io_service_
         start_accept();
     }
 

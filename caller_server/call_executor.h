@@ -4,8 +4,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include "common.h"
+#include <boost/asio.hpp>
 class call_executor
-    : public CInteractor,
+    : //public CInteractor,
       public boost::enable_shared_from_this<call_executor>
 {
      public:
