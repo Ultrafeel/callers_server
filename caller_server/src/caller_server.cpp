@@ -338,10 +338,53 @@ private:
 //typedef std::list<chat_server_ptr> chat_server_list;
 using namespace std;
 
+//: public boost::enable_shared_from_this<Y>
+//    boost::shared_ptr<Y> f()
+//    {
+//        return shared_from_this();
+//    }
 
+class Y
+{
+public:
+    void  tryUse()
+    {
+         std::cout << "attempt to use :"<< (uintptr_t)(void*)this<< std::endl;
+    }
+    ~Y()
+    {
+         std::cout << "destructor: "<< (uintptr_t)(void*)this<< std::endl;
+    }
+};
+
+struct Y_user
+{
+     boost::shared_ptr<Y> p;
+    ~Y_user()
+    {
+
+        std::cout << "Y_user destructor: "<< (uintptr_t)(void*)this<< std::endl;
+        if (p.get())
+            p->tryUse();
+    }
+};
+#include <boost/core/null_deleter.hpp>
 
 int main()
 {
+    {
+        Y_user yu;
+        Y y;
+        boost::shared_ptr<Y> p (&y, boost::null_deleter() );
+        yu.p = p;
+    }
+//y.shared_from_this();
+
+
+  int i = 0;
+  boost::shared_ptr<int> pi(&i, boost::null_deleter());
+
+
     cout << "!!!Hello Server!!" << endl; // prints !!!Hello Server!!
 
     char const * cfgP = "config.cfg";
