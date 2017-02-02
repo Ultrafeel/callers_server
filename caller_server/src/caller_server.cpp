@@ -32,7 +32,7 @@
 #include <boost/archive/text_iarchive.hpp>
 
 #include "CSettingsReader.h"
-
+#include "../call_executor.h"
 using boost::asio::ip::tcp;
 
 //----------------------------------------------------------------------
@@ -85,11 +85,6 @@ private:
 };
 
 
-class call_executor
-    : public CInteractor,
-      public boost::enable_shared_from_this<client_listen_session>
-{
-};
 
 class caller_executor_pool : public boost::noncopyable
 {
