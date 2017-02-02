@@ -19,6 +19,7 @@
 #include <list>
 #include <set>
 #include <queue>
+#include <mutex>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -52,10 +53,41 @@ typedef boost::shared_ptr<client_app> client_app_ptr;
 //----------------------------------------------------------------------
 using namespace std;
 char  const * endMessage = "\n end";
+struct CompaniesSorter
+{
+    bool operator () (CCompanyTask const & t1, CCompanyTask const & t2) const
+    {
+        if (t1.m_priority > t2.m_priority)
+            return true;
+        else if(t1.m_priority != t2.m_priority)
+            return false;
+        else
+        {
+            bool result = (t1.m_abonents.size() < t2.m_abonents.size());
+            return result;
+        }
+    }
+};
+
+struct CTask_to_handle
+{
+    CCompanyTask m_task;
+    client_app_ptr m_client;
+};
+struct CHandleTaskSorter
+{
+    bool operator () (CTask_to_handle const & t1, CTask_to_handle const & t2) const
+    {
+        return m_cs(t1.m_task, t2.m_task);
+    }
+private:
+    CompaniesSorter m_cs;
+};
 class caller_executor : public boost::noncopyable
 {
 
-    caller_executor()
+    caller_executor( boost::asio::io_service & io_service_):
+        m_io_service(io_service_)
     {
 
     }
@@ -65,50 +97,81 @@ public:
 
     void join(client_app_ptr participant)
     {
-        m_client_app = (participant);
+        // m_client_app = (participant);
 //        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
 //                      boost::bind(&client_app::deliver, participant, _1));
     }
 
     void leave(client_app_ptr participant)
     {
-          m_client_app .reset(); //erase(participant);
+        // m_client_app .reset(); //erase(participant);
     }
-    void CallCompanyTask(CCompanyTask const& ct)
+    void CallCompanyTask(CTask_to_handle const& th)
     {
-        if (!m_client_app.get())
+        client_app_ptr  client_app = th.m_client;
+        if (client_app.get())
             return;
 
+        CCompanyTask  const& ct = th.m_task;
         cout << "task ";
         cout <<ct.m_comp_name << endl ;
-        m_client_app->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
+        client_app->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
         size_t iu = 1;
         for (CAbonent const& us : ct.m_abonents)
         {
             cout << ++iu << " abonent " << us.m_name << endl;
 
-            m_client_app->deliver(CServerStatus(us.m_name ));
+            client_app->deliver(CServerStatus(us.m_name ));
         }
-        m_client_app->deliver(CServerStatus(endMessage));
+        bool tasks_left = false;
+        client_app->deliver(CServerStatus(endMessage));
+        for (CTask_to_handle const& thi : read_queue)
+        {
+            if (thi.m_client.get() == client_app.get())
+                tasks_left= true;
+        }
+        if (tasks_left)
+            client_app->deliver(CServerStatus("All tasks end"));
+        else
+            client_app->deliver(CServerStatus("Have some your tasks"));
+
     }
 
-    void deliver(const CCompanyTask& msg)
+    void deliver(CCompanyTask&& msg, client_app_ptr client)
     {
-        CallCompanyTask(msg);
 
+       {
+            std::lock_guard<std::mutex> lock(m_queue_m);
+               // read_queue.emplace(*current_companyTask.release());
+
+        //CallCompanyTask(msg);
+        read_queue.emplace(CTask_to_handle{ msg, client});
+       }
 //        recent_msgs_.push_back(msg);
 //        while (recent_msgs_.size() > max_recent_msgs)
 //            recent_msgs_.pop_front();
 //        m_client_app->deliver(msg);
+        m_io_service.post(boost::bind(& caller_executor::Proc, this));
 //        std::for_each(m_client_app.begin(), m_client_app.end(),
 //                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
 
+    void Proc()
+    {
+
+        //m_io_service.post()
+    }
 private:
-    client_app_ptr  m_client_app;
-    //std::set<client_app_ptr> m_client_app;
+    //client_app_ptr  m_client_app;
+    std::set<client_app_ptr> m_client_app;
     enum { max_recent_msgs = 100 };
+    std::mutex m_queue_m;
+
+    //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
+   // std::set<CCompanyTask, CompaniesSorter>
+    std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
     // server_status_queue recent_msgs_;
+    boost::asio::io_service & m_io_service;
 };
 
 //----------------------------------------------------------------------
@@ -119,14 +182,14 @@ class client_listen_session
 {
 public:
     client_listen_session(boost::asio::io_service& io_service, caller_executor& room)
-        : socket_(io_service),
+        : m_socket(io_service),
           m_caller(room)
     {
     }
 
     tcp::socket& socket()
     {
-        return socket_.socket();
+        return m_socket.socket();
     }
 
     void start()
@@ -138,11 +201,11 @@ public:
     void async_read_msg()
     {
         current_companyTask.reset(new CCompanyTask());
-        socket_.async_read(*current_companyTask,
-                           // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                           boost::bind(
-                               &client_listen_session::handle_read_header, shared_from_this(),
-                               boost::asio::placeholders::error));
+        m_socket.async_read(*current_companyTask,
+                            // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+                            boost::bind(
+                                &client_listen_session::handle_read_header, shared_from_this(),
+                                boost::asio::placeholders::error));
     }
 
     void deliver(const CServerStatus& msg)
@@ -151,7 +214,7 @@ public:
         write_msgs_.push_back(msg);
         if (!write_in_progress)
         {
-            socket_.async_write(
+            m_socket.async_write(
                 write_msgs_.front(),//  boost::asio::buffer(write_msgs_.front().data(),
                 // write_msgs_.front().length()),
                 boost::bind(&client_listen_session::handle_write, shared_from_this(),
@@ -165,16 +228,14 @@ public:
         {
 
             {
+                 m_caller.deliver(*current_companyTask.release() ,client_app_ptr( this->shared_from_this()) );
 
-
-                std::lock_guard<std::mutex> lock(m_queue_m);
-                read_queue.emplace(*current_companyTask.release());
-           }
-            socket_
-            m_caller.CallCompanyTask()
-                m_caller.CallCompanyTask(read_queue.top());
-                read_queue.pop();
-             async_read_msg();//<recursion
+            }
+            //m_socket.
+           // m_caller.CallCompanyTask()
+            m_caller.CallCompanyTask(read_queue.top());
+            //read_queue.pop();
+           // async_read_msg();//<recursion
         }
         else
         {
@@ -208,10 +269,10 @@ public:
             //loop while write_msgs_ not empty
             if (!write_msgs_.empty())
             {
-                socket_.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
-                                     //   write_msgs_.front().length()),
-                                     boost::bind(&client_listen_session::handle_write, shared_from_this(),
-                                                 boost::asio::placeholders::error));
+                m_socket.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
+                                      //   write_msgs_.front().length()),
+                                      boost::bind(&client_listen_session::handle_write, shared_from_this(),
+                                                  boost::asio::placeholders::error));
             }
 
             if (isEnd)
@@ -222,30 +283,14 @@ public:
             m_caller.leave(shared_from_this());
         }
     }
-   struct CompaniesSorter
-   {
-    bool operator () (CCompanyTask const & t1, CCompanyTask const & t2) const
-    {
-        if (t1.m_priority > t2.m_priority)
-            return true;
-        else if(t1.m_priority != t2.m_priority)
-            return false;
-        else
-        {
-            bool result = (t1.m_abonents.size() < t2.m_abonents.size());
-            return result;
-        }
-    }
-   };
+
 private:
 
     // tcp::socket
 
-    serialize_sock::connection socket_;
-    std::mutex m_queue_m;
+    serialize_sock::connection m_socket;
     caller_executor& m_caller;
     std::unique_ptr<CCompanyTask> current_companyTask;
-    std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter> read_queue;
     // chat_message read_msg_;
     server_status_queue write_msgs_;
 };
