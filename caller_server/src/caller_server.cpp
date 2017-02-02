@@ -32,6 +32,7 @@
 #include <boost/archive/text_iarchive.hpp>
 
 #include "CSettingsReader.h"
+#include "../common.h"
 #include "../call_executor.h"
 using boost::asio::ip::tcp;
 
@@ -40,15 +41,6 @@ using boost::asio::ip::tcp;
 typedef std::deque<CServerStatus> server_status_queue;
 
 //----------------------------------------------------------------------
-
-class CInteractor
-{
-public:
-    virtual ~CInteractor() {}
-    virtual void deliver(const CServerStatus& msg) = 0;
-};
-
-typedef boost::shared_ptr<CInteractor> CInteractor_ptr;
 
 //----------------------------------------------------------------------
 using namespace std;
@@ -140,7 +132,7 @@ public:
 
     }
 
-    void deliver(CCompanyTask&& msg, CInteractor_ptr client)
+    void deliver(CCompanyTask const& msg, CInteractor_ptr client)
     {
 
        {
@@ -308,8 +300,9 @@ public:
     call_server(boost::asio::io_service& io_service,
                 const tcp::endpoint& endpoint)
         : io_service_(io_service),
-          acceptor_(io_service, endpoint)
+          acceptor_(io_service, endpoint), caller_executor_pool(io_service)
     {
+        io_service_
         start_accept();
     }
 

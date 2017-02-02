@@ -56,6 +56,11 @@
 			<Add before='echo &quot;TARGET_OUTPUT_DIR = $(TARGET_OUTPUT_DIR)&quot;' />
 			<Add before='echo &quot;TARGET_NAME  = $(TARGET_NAME)&quot;' />
 		</ExtraCommands>
+		<Unit filename="./common.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="call_executor.cpp" />
+		<Unit filename="call_executor.h" />
 		<Unit filename="src/caller_server.cpp" />
 		<Extensions>
 			<code_completion />
