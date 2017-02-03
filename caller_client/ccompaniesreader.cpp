@@ -56,10 +56,10 @@ bool CCompaniesReader::OpenAndReadTasks()
             auto users = itComp->second.get_child_optional("Users"); //""<std::string>
             if (users)
             {
-                company.m_abonents.resize(company.m_abonents.size() + 1);
-                CAbonent & abon =  company.m_abonents.back();
                 for (ptree::const_iterator itUser = users->begin(); itUser != users->end(); ++itUser)
                 {
+                    company.m_abonents.resize(company.m_abonents.size() + 1);
+                    CAbonent & abon =  company.m_abonents.back();
                     abon.m_name = itUser->first;
                     abon.m_number = itUser->second.get_value(" no num!!") ;
                     std::cout << " user name: " <<  abon.m_name << std::endl;//second.get("adv", "-no adv!-")
