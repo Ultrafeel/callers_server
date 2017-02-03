@@ -106,7 +106,7 @@ public:
     void leave(CInteractor_ptr participant)
     {
         using namespace std;
-        cout << __FUNCTION__ << " leave" << endl;
+        cout << __FUNCTION__ << " ." << endl;
         m_client_sessions.erase(participant);
     }
 

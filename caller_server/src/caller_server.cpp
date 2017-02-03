@@ -104,9 +104,10 @@ public:
             {
                   std::cout << __FUNCTION__ << ": all client's companies have been red  " << std::endl;
             }
-
+            else
             {
                 m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
+                async_read_msg();
 
             }
             //m_socket.

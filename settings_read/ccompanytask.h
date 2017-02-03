@@ -51,7 +51,7 @@ public:
 //    std::string  m_advertise;
 //
 //    std::deque<std::string> m_abonents;
-      enum {  max_message_length = 111 };
+    //  enum {  max_message_length = 111 };
     template <typename Archive>
     void serialize(Archive& ar, int version)
     {

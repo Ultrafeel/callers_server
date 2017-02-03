@@ -131,7 +131,7 @@ private:
     {
         if (!error)
         {
-            if (finished)
+            if (!finished)
             {
                 write_msgs_.pop_front();
                 if (!write_msgs_.empty())
@@ -154,9 +154,8 @@ private:
             }
             else
             {
-                std::cout << __FUNCTION__ << ": finishet transmitting Companies. " << std::endl;
+                std::cout << __FUNCTION__ << ": finished transmitting Companies. " << std::endl;
             }
-
 
         }
         else
