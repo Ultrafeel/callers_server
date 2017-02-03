@@ -48,7 +48,7 @@ bool CCompaniesReader::OpenAndReadTasks()
 
             //   get("---")    for (ptree::const_iterator  nid= p2->begin(); nid != p2->end(); )
             company.m_comp_name = itComp->first;
-            std::cout << " comp name:" << itComp->first << std::endl;
+            std::cout << " comp name: " << itComp->first << std::endl;
             company.m_priority = itComp->second.get("priority", 0);
             std::cout << " comp priority: " <<  company.m_priority  << std::endl;
             company.m_advertise = itComp->second.get("adv", "--");
@@ -62,7 +62,7 @@ bool CCompaniesReader::OpenAndReadTasks()
                 {
                     abon.m_name = itUser->first;
                     abon.m_number = itUser->second.get_value(" no num!!") ;
-                    std::cout << " user name:" <<  abon.m_name << std::endl;//second.get("adv", "-no adv!-")
+                    std::cout << " user name: " <<  abon.m_name << std::endl;//second.get("adv", "-no adv!-")
 
                     std::cout << " user num: " << abon.m_number << std::endl;
                 }

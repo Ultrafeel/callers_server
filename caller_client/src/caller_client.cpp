@@ -79,7 +79,7 @@ private:
         if (!error)// && read_msg_.decode_header())
         {
             using namespace std;
-            cout << "currently :" <<  read_msg_.message << endl;
+            cout << "currently : " <<  read_msg_.message << endl;
             socket_.async_read(
                 read_msg_, //boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
                 boost::bind(&Caller_client::handle_read_response, this,
