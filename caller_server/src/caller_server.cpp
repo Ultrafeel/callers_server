@@ -73,7 +73,7 @@ public:
                                 boost::asio::placeholders::error));
     }
 
-    void deliver(const CServerStatus& msg)
+    void deliver(const CServerStatus& msg) override
     {
 
         bool write_in_progress;
@@ -102,16 +102,16 @@ public:
         {
 
             {
-                 m_caller.deliver(*current_companyTask ,CInteractor_ptr( this->shared_from_this()) );
+                m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
 
             }
             //m_socket.
-           // m_caller.CallCompanyTask()
+            // m_caller.CallCompanyTask()
 
-           // m_caller.CallCompanyTask(read_queue.top());
+            // m_caller.CallCompanyTask(read_queue.top());
 
             //read_queue.pop();
-           // async_read_msg();//<recursion
+            // async_read_msg();//<recursion
         }
         else
         {
@@ -134,7 +134,7 @@ public:
 //            m_caller.leave(shared_from_this());
 //        }
 //    }
-
+private:
     void handle_write(const boost::system::error_code& error)
     {
         if (!error)
@@ -157,9 +157,11 @@ public:
                                       boost::bind(&client_listen_session::handle_write, shared_from_this(),
                                                   boost::asio::placeholders::error));
             }
-
-            if (isEnd)
-                m_caller.leave(shared_from_this());
+            else
+            {
+                if (isEnd)
+                    m_caller.leave(shared_from_this());
+            }
         }
         else
         {
@@ -167,7 +169,7 @@ public:
         }
     }
 
-private:
+
 
     // tcp::socket
 
@@ -191,7 +193,7 @@ public:
         : io_service_(io_service),
           acceptor_(io_service, endpoint), m_caller(io_service)//caller_executor_pool
     {
-       // io_service_
+        // io_service_
         start_accept();
     }
 

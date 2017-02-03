@@ -16,31 +16,21 @@ call_executor::~call_executor()
 using namespace std;
 void call_executor::CallCompanyTask(CTask_to_handle const& th)
 {
-        CInteractor_ptr  CInteractor = th.m_client;
-        if (CInteractor.get())
+        CInteractor_ptr  client = th.m_client;
+        if (client.get())
             return;
 
         CCompanyTask  const& ct = th.m_task;
         cout << "task ";
         cout <<ct.m_comp_name << endl ;
-        CInteractor->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
+        client->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
         size_t iu = 1;
         for (CAbonent const& us : ct.m_abonents)
         {
             cout << ++iu << " abonent " << us.m_name << endl;
 
-            CInteractor->deliver(CServerStatus(us.m_name ));
+            client->deliver(CServerStatus(us.m_name));
         }
-        bool tasks_left = false;
-        CInteractor->deliver(CServerStatus(endMessage));
-        for (CTask_to_handle const& thi : read_queue)
-        {
-            if (thi.m_client.get() == CInteractor.get())
-                tasks_left= true;
-        }
-        if (tasks_left)
-            CInteractor->deliver(CServerStatus("All tasks end"));
-        else
-            CInteractor->deliver(CServerStatus("Have some your tasks"));
+        client->deliver(CServerStatus( + " ended" ));
 
     }

@@ -5,6 +5,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 #include <set>
+#include <assert.h>
 #include <mutex>
 #include "common.h"
 
@@ -48,18 +49,31 @@ class call_executor
     : //public CInteractor,
       public boost::enable_shared_from_this<call_executor>
 {
-     public:
-        call_executor();
-        virtual ~call_executor();
+public:
+    call_executor();
+    virtual ~call_executor();
 
 
 
-        boost::asio::io_service *  m_pio_service;
-        caller_executor_pool * m_pool;
-    protected:
+    void Proc(CTask_to_handle & task)
+    {
+        if (boost::asio::io_service *  pIo_service = m_pio_service)
+        {
+            pIo_service->post(boost::bind(&call_executor::CallCompanyTask, this, task));
+        }
+        else
+        {
+            assert(0);
+        }
+        //m_io_service.post()
+    }
 
-    private:
-         void CallCompanyTask(CTask_to_handle const& th);
+    boost::asio::io_service *  m_pio_service;
+    caller_executor_pool * m_pool;
+protected:
+
+private:
+    void CallCompanyTask(CTask_to_handle const& th);
 
 };
 
@@ -68,7 +82,7 @@ class caller_executor_pool : public boost::noncopyable
 {
 
     caller_executor_pool( boost::asio::io_service & io_service_):
-      m_call_executor() , m_io_service(io_service_)
+        m_call_executor(), m_io_service(io_service_)
     {
 
     }
@@ -92,27 +106,39 @@ public:
     void deliver(CCompanyTask const& msg, CInteractor_ptr client)
     {
 
-       {
+        CTask_to_handle task1;
+        {
             std::lock_guard<std::mutex> lock(m_queue_m);
-               // read_queue.emplace(*current_companyTask.release());
+            // read_queue.emplace(*current_companyTask.release());
 
-        //CallCompanyTask(msg);
-        read_queue.emplace(CTask_to_handle{ msg, client});
-       }
+            //CallCompanyTask(msg);
+            read_queue.emplace(CTask_to_handle{ msg, client});
+            auto top = read_queue.begin();
+            task1 = *top;
+            read_queue.erase(top);
+        }
+        m_call_executor.Proc(task1);
+
+        bool tasks_left = false;
+        for (CTask_to_handle const& thi : read_queue)
+        {
+            if (thi.m_client.get() == client.get())
+                tasks_left= true;
+        }
+        if (tasks_left)
+            client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
+        else
+            client->deliver(CServerStatus("Have some your tasks"));
+
 //        recent_msgs_.push_back(msg);
 //        while (recent_msgs_.size() > max_recent_msgs)
 //            recent_msgs_.pop_front();
 //        m_client_app->deliver(msg);
-        m_io_service.post(boost::bind(& caller_executor_pool::Proc, this));
+        //  m_call_executor.
 //        std::for_each(m_client_app.begin(), m_client_app.end(),
 //                      boost::bind(&client_app::deliver, _1, boost::ref(msg)));
     }
 
-    void Proc()
-    {
-
-        //m_io_service.post()
-    }
 private:
     //client_app_ptr  m_client_app;
     std::set<CInteractor_ptr> m_client_app;
@@ -121,7 +147,7 @@ private:
 
     call_executor m_call_executor;
     //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
-   // std::set<CCompanyTask, CompaniesSorter>
+    // std::set<CCompanyTask, CompaniesSorter>
     std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
     // server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
