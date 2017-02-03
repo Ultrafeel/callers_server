@@ -50,11 +50,15 @@ class call_executor
         call_executor();
         virtual ~call_executor();
 
+
+
         boost::asio::io_service *  m_pio_service;
         caller_executor_pool * m_pool;
     protected:
 
     private:
+         void CallCompanyTask(CTask_to_handle const& th);
+
 };
 
 
@@ -68,7 +72,6 @@ class caller_executor_pool : public boost::noncopyable
     }
     friend class call_server;
 public:
-    void CallCompanyTask(CTask_to_handle const& th);
 
     static char  const * endMessage ;//= "\n end";
     void join(CInteractor_ptr participant)

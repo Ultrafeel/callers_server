@@ -14,8 +14,8 @@ call_executor::~call_executor()
   char  const * caller_executor_pool::endMessage = "\n end";
 
 using namespace std;
-      void caller_executor_pool::CallCompanyTask(CTask_to_handle const& th)
-    {
+void call_executor::CallCompanyTask(CTask_to_handle const& th)
+{
         CInteractor_ptr  CInteractor = th.m_client;
         if (CInteractor.get())
             return;
