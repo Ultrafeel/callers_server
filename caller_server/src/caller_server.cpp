@@ -93,7 +93,7 @@ public:
         {
 
             {
-                 m_caller.deliver(*current_companyTask.release() ,CInteractor_ptr( this->shared_from_this()) );
+                 m_caller.deliver(*current_companyTask ,CInteractor_ptr( this->shared_from_this()) );
 
             }
             //m_socket.
