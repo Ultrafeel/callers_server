@@ -11,7 +11,7 @@ call_executor::~call_executor()
 }
 
  // static
-  char  const * caller_executor_pool::endMessage = "\n end";
+  char  const * caller_executor_pool::endMessage = "\n All tasks end";
 
 using namespace std;
 void call_executor::CallCompanyTask(CTask_to_handle const& th)

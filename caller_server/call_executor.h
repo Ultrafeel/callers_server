@@ -90,7 +90,7 @@ class caller_executor_pool: public executor_pool_base
     friend class call_server;
 public:
 
-    static char  const * endMessage ;//= "\n end";
+    static char  const * endMessage ;//= "\n All tasks end";
     void join(CInteractor_ptr participant)
     {
         // m_client_app = (participant);
@@ -151,7 +151,7 @@ public:
 private:
     //client_app_ptr  m_client_app;
     std::set<CInteractor_ptr> m_client_app;
-    enum { max_recent_msgs = 100 };
+   // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
  //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
