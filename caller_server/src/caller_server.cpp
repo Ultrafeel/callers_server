@@ -102,7 +102,7 @@ public:
         {
             if (  current_companyTask->IsTerminatorCompany() )
             {
-                  std::cout << __FUNCTION__ << ": all client's companies have been red  " << std::endl;
+                  std::cout << __FUNCTION__ << ": all client's companies have been read  " << std::endl;
             }
             else
             {

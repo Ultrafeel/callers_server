@@ -10,7 +10,15 @@ class CServerStatus
         virtual ~CServerStatus();
 
         std::string message;
+   static  char const * getLastMark()
+    {
+        return "\n isLastMark";
+    }
 
+    bool isLastMark() const
+    {
+        return (getLastMark() == message);
+    }
     template <typename Archive>
     void serialize(Archive& ar, int version)
     {

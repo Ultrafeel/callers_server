@@ -154,7 +154,12 @@ public:
 
         }
         if (tasks_left)
-            client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
+         {
+                client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
+
+                CServerStatus endStatus (CServerStatus::getLastMark());
+                client->deliver(endStatus);
+         }
         else
             client->deliver(CServerStatus("Have some your tasks"));
 
