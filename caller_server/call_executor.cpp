@@ -31,6 +31,6 @@ void call_executor::CallCompanyTask(CTask_to_handle const& th)
 
             client->deliver(CServerStatus(us.m_name));
         }
-        client->deliver(CServerStatus( + " ended" ));
+        client->deliver(CServerStatus( ct.m_comp_name + " ended" ));
 
     }
