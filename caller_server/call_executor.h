@@ -52,6 +52,7 @@ public:
     virtual  void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) = 0;
     virtual ~executor_pool_base()
     {}
+    virtual boost::asio::io_service& get_io_serv() = 0;
 };
 class call_executor
     : //public CInteractor,
@@ -65,15 +66,7 @@ public:
 
     void Proc(CTask_to_handle & task)
     {
-        if (boost::asio::io_service *  pIo_service = m_pio_service)
-        {
-            pIo_service->post(boost::bind(&call_executor::CallCompanyTask, this, task));
-        }
-        else
-        {
-            assert(0);
-        }
-        //m_io_service.post()
+        m_pool.get_io_serv().post(boost::bind(&call_executor::CallCompanyTask, this, task));
     }
 
     boost::asio::io_service *  m_pio_service;
@@ -113,6 +106,10 @@ public:
    void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
    {
        client->deliver(msg);
+   }
+    boost::asio::io_service& get_io_serv() override
+   {
+       return m_io_service;
    }
 
     void deliver(CCompanyTask const& msg, CInteractor_ptr client)
