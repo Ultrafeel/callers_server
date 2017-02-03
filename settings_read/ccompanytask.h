@@ -32,6 +32,15 @@ struct TCompanyTask
 class CCompanyTask : public TCompanyTask
 {
 public:
+    static char const * getTerminatedName()
+    {
+        return "\n No more Companies";
+    }
+    bool IsTerminatorCompany() const
+    {
+        return (m_comp_name == getTerminatedName());
+    }
+
     CCompanyTask();
     CCompanyTask(TCompanyTask const & ct):TCompanyTask(ct) {};
     virtual ~CCompanyTask();

@@ -100,6 +100,10 @@ public:
     {
         if (!error  )
         {
+            if (  current_companyTask->IsTerminatorCompany() )
+            {
+                  std::cout << __FUNCTION__ << ": all client's companies have been red  " << std::endl;
+            }
 
             {
                 m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
