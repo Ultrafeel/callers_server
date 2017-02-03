@@ -67,12 +67,12 @@ private:
 
             socket_.async_read(
                 read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                boost::bind(&Caller_client::handle_read_header, this,
+                boost::bind(&Caller_client::handle_read_response, this,
                             boost::asio::placeholders::error));
         }
     }
 
-    void handle_read_header(const boost::system::error_code& error)
+    void handle_read_response(const boost::system::error_code& error)
     {
         if (!error)// && read_msg_.decode_header())
         {
@@ -80,7 +80,7 @@ private:
             cout << "currently :" <<  read_msg_.message << endl;
             socket_.async_read(
                 read_msg_, //boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
-                boost::bind(&Caller_client::handle_read_header, this,
+                boost::bind(&Caller_client::handle_read_response, this,
                             boost::asio::placeholders::error));
         }
         else
@@ -97,7 +97,7 @@ private:
 //            std::cout << "\n";
 //               socket_.async_read(
 //                                    read_msg_,//boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-//                                    boost::bind(&chat_client::handle_read_header, this,
+//                                    boost::bind(&Caller_client::handle_read_response, this,
 //                                                boost::asio::placeholders::error));
 //        }
 //        else

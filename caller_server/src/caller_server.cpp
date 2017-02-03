@@ -69,7 +69,7 @@ public:
         m_socket.async_read(*current_companyTask,
                             // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                             boost::bind(
-                                &client_listen_session::handle_read_header, shared_from_this(),
+                                &client_listen_session::handle_read_company, shared_from_this(),
                                 boost::asio::placeholders::error));
     }
 
@@ -87,7 +87,7 @@ public:
         }
     }
 
-    void handle_read_header(const boost::system::error_code& error)
+    void handle_read_company(const boost::system::error_code& error)
     {
         if (!error  )
         {
@@ -117,7 +117,7 @@ public:
 //            m_caller.deliver(read_msg_);
 //
 //            socket_.async_read( task //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-//                                    boost::bind(&client_listen_session::handle_read_header, shared_from_this(),
+//                                    boost::bind(&client_listen_session::handle_read_company, shared_from_this(),
 //                                                boost::asio::placeholders::error));
 //        }
 //        else
