@@ -7,6 +7,7 @@
 #include <set>
 #include <assert.h>
 #include <mutex>
+#include <iostream>
 #include "common.h"
 
 
@@ -53,6 +54,7 @@ public:
     virtual ~executor_pool_base()
     {}
     virtual boost::asio::io_service& get_io_serv() = 0;
+    virtual void CheckIfLeft(CInteractor_ptr client)  = 0;
 };
 class call_executor
     : //public CInteractor,
@@ -96,21 +98,26 @@ public:
         // m_client_app = (participant);
 //        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
 //                      boost::bind(&client_app::deliver, participant, _1));
+        using namespace std;
+        cout << __FUNCTION__ << " join" << endl;
+
     }
 
     void leave(CInteractor_ptr participant)
     {
+        using namespace std;
+        cout << __FUNCTION__ << " leave" << endl;
         // m_client_app .reset(); //erase(participant);
     }
 
-   void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
-   {
-       client->deliver(msg);
-   }
+    void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
+    {
+        client->deliver(msg);
+    }
     boost::asio::io_service& get_io_serv() override
-   {
-       return m_io_service;
-   }
+    {
+        return m_io_service;
+    }
 
     void deliver(CCompanyTask const& msg, CInteractor_ptr client)
     {
@@ -127,12 +134,24 @@ public:
             read_queue.erase(top);
         }
         m_call_executor.Proc(task1);
+    }
+
+    void CheckIfLeft(CInteractor_ptr client) override
+    {
 
         bool tasks_left = false;
-        for (CTask_to_handle const& thi : read_queue)
         {
-            if (thi.m_client.get() == client.get())
-                tasks_left= true;
+            std::lock_guard<std::mutex> lock(m_queue_m);
+            for (CTask_to_handle const& thi : read_queue)
+            {
+                if (thi.m_client == client)//.get()
+                {
+                    tasks_left= true;
+                    break;
+                }
+
+            }
+
         }
         if (tasks_left)
             client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
@@ -151,10 +170,10 @@ public:
 private:
     //client_app_ptr  m_client_app;
     std::set<CInteractor_ptr> m_client_app;
-   // enum { max_recent_msgs = 100 };
+    // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
- //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
+//std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
     // std::set<CCompanyTask, CompaniesSorter>
     std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
     // server_status_queue recent_msgs_;

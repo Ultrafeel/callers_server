@@ -70,6 +70,8 @@ private:
                 boost::bind(&Caller_client::handle_read_response, this,
                             boost::asio::placeholders::error));
         }
+        else
+            std::cout << __FUNCTION__ << ": error " << error << std::endl;
     }
 
     void handle_read_response(const boost::system::error_code& error)
@@ -85,6 +87,8 @@ private:
         }
         else
         {
+            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+
             do_close();
         }
     }
@@ -136,12 +140,15 @@ private:
         }
         else
         {
+            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+
             do_close();
         }
     }
 
     void do_close()
     {
+        std::cout << " client closing " << std::endl;
         socket_.socket().close();
     }
 
@@ -162,11 +169,13 @@ int main(int argc, char* argv[])
     // Check command line arguments.
     if (argc > 2)
     {
-      std::cerr << "Usage: caller_client \"<companies file name>\"" << std::endl;
-      return 1;
+        std::cerr << "Usage: caller_client \"<companies file name>\"" << std::endl;
+        return 1;
     }
     else if (argc == 2)
-    {   compTasks = argv[1];    }
+    {
+        compTasks = argv[1];
+    }
 
     cout << "!!!Hello Client!!! Used companies file: \"" << compTasks << "\"" << endl; // prints !!!Hello World!!!
     char const * cfgP = "config_cl.cfg";
@@ -220,7 +229,7 @@ int main(int argc, char* argv[])
         // while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
         for ( CCompanyTask & msg : cr.m_tasks)
         {
-           // using namespace std; // For strlen and memcpy.
+            // using namespace std; // For strlen and memcpy.
             //CCompanyTask msg=  TCompanyTask { line };
 //            msg.body_length(strlen(line));
 //            memcpy(msg.body(), line, msg.body_length());
@@ -228,7 +237,7 @@ int main(int argc, char* argv[])
             c.write(msg);
         }
 
-        c.close();
+        //c.close();
         t.join();
     }
     catch (std::exception& e)

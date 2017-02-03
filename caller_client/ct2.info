@@ -1,0 +1,35 @@
+;
+companies 
+{
+
+"Company 2-1" {
+    priority 3
+    adv "wow"
+    Users
+    {
+
+        "pupkin" "222-33"
+        "ejkin" "223-33"
+        "vaskin" "333-33"
+   }
+}
+
+; 
+"comp 2-2" {
+    priority 4
+    adv "comp 2"
+ 
+   Users  {
+
+      "pupkin" "222-33"
+      "v"  "value split "\
+          "over three"\
+          "lines"
+        
+      a_key_without_value ""
+      "a key with special characters in it {};#\n\t\"\0" ""
+      "" value    ; Empty key with a value
+      "p" ""       ; Empty key with empty value!
+   }   
+}
+}

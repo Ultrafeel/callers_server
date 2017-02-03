@@ -115,6 +115,8 @@ public:
         }
         else
         {
+                       std::cout << __FUNCTION__ << ": error " << error << std::endl;
+
             m_caller.leave(shared_from_this());
         }
     }
@@ -173,6 +175,8 @@ private:
         }
         else
         {
+                       std::cout << __FUNCTION__ << ": error " << error << std::endl;
+
             m_caller.leave(shared_from_this());
         }
     }
@@ -222,6 +226,8 @@ public:
         {
             session->start();
         }
+        else
+        { std::cout << __FUNCTION__ << ": error " << error << std::endl;}
 
         start_accept();
     }
