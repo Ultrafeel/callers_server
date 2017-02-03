@@ -123,20 +123,41 @@ private:
                             boost::asio::placeholders::error));
         }
     }
-
     void handle_write(const boost::system::error_code& error)
+    {
+        return handle_write_intrenal(error, false);
+    }
+    void handle_write_intrenal(const boost::system::error_code& error, bool finished)
     {
         if (!error)
         {
-            write_msgs_.pop_front();
-            if (!write_msgs_.empty())
+            if (finished)
             {
-                socket_.async_write(
-                    write_msgs_.front(), //boost::asio::buffer(write_msgs_.front().data(),
-                    //   write_msgs_.front().length()),
-                    boost::bind(&Caller_client::handle_write, this,
-                                boost::asio::placeholders::error));
+                write_msgs_.pop_front();
+                if (!write_msgs_.empty())
+                {
+                    socket_.async_write(
+                        write_msgs_.front(), //boost::asio::buffer(write_msgs_.front().data(),
+                        //   write_msgs_.front().length()),
+                        boost::bind(&Caller_client::handle_write, this,
+                                    boost::asio::placeholders::error));
+                }
+                else
+                {
+                    CCompanyTask ct(TCompanyTask {CCompanyTask::getTerminatedName()});
+                    socket_.async_write(
+                        ct,//boost::asio::buffer(write_msgs_.front().data(),
+                        //   write_msgs_.front().length()),
+                        boost::bind(&Caller_client::handle_write_intrenal, this,
+                                    boost::asio::placeholders::error, true));
+                }
             }
+            else
+            {
+                std::cout << __FUNCTION__ << ": finishet transmitting Companies. " << std::endl;
+            }
+
+
         }
         else
         {
