@@ -95,7 +95,7 @@ public:
     static char  const * endMessage ;//= "\n All tasks end";
     void join(CInteractor_ptr participant)
     {
-         m_client_sessions.insert(participant);
+        m_client_sessions.insert(participant);
 //        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
 //                      boost::bind(&client_app::deliver, participant, _1));
         using namespace std;
@@ -113,6 +113,7 @@ public:
     void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
     {
         client->deliver(msg);
+        CheckIfLeft(client);
     }
     boost::asio::io_service& get_io_serv() override
     {
@@ -153,13 +154,15 @@ public:
             }
 
         }
-        if (tasks_left)
-         {
-                client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
+        if (!tasks_left)
+        {
+            cout << __FUNCTION__ << " no tasks_left ." << endl;
 
-                CServerStatus endStatus (CServerStatus::getLastMark());
-                client->deliver(endStatus);
-         }
+            client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
+
+            CServerStatus endStatus (CServerStatus::getLastMark());
+            client->deliver(endStatus);
+        }
         else
             client->deliver(CServerStatus("Have some your tasks"));
 
@@ -176,6 +179,7 @@ private:
     //client_app_ptr  m_client_app;
     //holds pointers.
     std::set<CInteractor_ptr> m_client_sessions;
+   // std::set<CInteractor_weak_ptr> m_client_sessions;
     // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
