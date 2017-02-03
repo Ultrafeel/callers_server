@@ -76,7 +76,7 @@ public:
     void deliver(const CServerStatus& msg) override
     {
 
-        bool write_in_progress;
+        bool write_in_progress = true;
         {
             default_mlock l1(write_msg_mutex);
             write_in_progress = !write_msgs_.empty();
@@ -147,21 +147,29 @@ private:
 
                 write_msgs_.pop_front();
             }
-            default_mlock l2(write_msg_mutex);
 
-            //loop while write_msgs_ not empty
-            if (!write_msgs_.empty())
+
             {
-                m_socket.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
-                                      //   write_msgs_.front().length()),
-                                      boost::bind(&client_listen_session::handle_write, shared_from_this(),
-                                                  boost::asio::placeholders::error));
+                default_mlock l2(write_msg_mutex);
+
+                //loop while write_msgs_ not empty
+                if (!write_msgs_.empty())
+                {
+                    m_socket.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
+                                          //   write_msgs_.front().length()),
+                                          boost::bind(&client_listen_session::handle_write, shared_from_this(),
+                                                      boost::asio::placeholders::error));
+                }
+                else
+                {
+                    isEnd = false;
+                }
+
             }
-            else
-            {
-                if (isEnd)
-                    m_caller.leave(shared_from_this());
-            }
+            if (isEnd)
+                m_caller.leave(shared_from_this());
+
+
         }
         else
         {
@@ -177,7 +185,9 @@ private:
     caller_executor_pool& m_caller;
     std::unique_ptr<CCompanyTask> current_companyTask;
     // chat_message read_msg_;
+
     std::mutex write_msg_mutex;
+
     server_status_queue write_msgs_;
 };
 
