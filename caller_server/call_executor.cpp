@@ -17,7 +17,7 @@ using namespace std;
 void call_executor::CallCompanyTask(CTask_to_handle const& th)
 {
         CInteractor_ptr  client = th.m_client;
-        if (client.get())
+        if (!client.get())
             return;
 
         CCompanyTask  const& ct = th.m_task;

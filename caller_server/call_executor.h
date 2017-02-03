@@ -95,7 +95,7 @@ public:
     static char  const * endMessage ;//= "\n All tasks end";
     void join(CInteractor_ptr participant)
     {
-        // m_client_app = (participant);
+         m_client_sessions.insert(participant);
 //        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
 //                      boost::bind(&client_app::deliver, participant, _1));
         using namespace std;
@@ -107,7 +107,7 @@ public:
     {
         using namespace std;
         cout << __FUNCTION__ << " leave" << endl;
-        // m_client_app .reset(); //erase(participant);
+        m_client_sessions.erase(participant);
     }
 
     void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
@@ -169,7 +169,8 @@ public:
 
 private:
     //client_app_ptr  m_client_app;
-    std::set<CInteractor_ptr> m_client_app;
+    //holds pointers.
+    std::set<CInteractor_ptr> m_client_sessions;
     // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
