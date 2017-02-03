@@ -7,7 +7,9 @@ class CInteractor
 {
 public:
     virtual ~CInteractor() {}
+private:
     virtual void deliver(const CServerStatus& msg) = 0;
+    friend class caller_executor_pool;
 };
 
 typedef boost::shared_ptr<CInteractor> CInteractor_ptr;

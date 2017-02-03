@@ -1,6 +1,6 @@
 #include "call_executor.h"
 #include <iostream>
-call_executor::call_executor()
+call_executor::call_executor( executor_pool_base & pool): m_pool(pool)
 {
     //ctor
 }
@@ -23,14 +23,14 @@ void call_executor::CallCompanyTask(CTask_to_handle const& th)
         CCompanyTask  const& ct = th.m_task;
         cout << "task ";
         cout <<ct.m_comp_name << endl ;
-        client->deliver(CServerStatus( "compon name " +  ct.m_comp_name));
+        m_pool.deliver_to_client(client ,CServerStatus( "compon name " +  ct.m_comp_name));
         size_t iu = 1;
         for (CAbonent const& us : ct.m_abonents)
         {
             cout << ++iu << " abonent " << us.m_name << endl;
 
-            client->deliver(CServerStatus(us.m_name));
+             m_pool.deliver_to_client(client ,CServerStatus(us.m_name));
         }
-        client->deliver(CServerStatus( ct.m_comp_name + " ended" ));
+        m_pool.deliver_to_client(client ,CServerStatus( ct.m_comp_name + " ended" ));
 
     }

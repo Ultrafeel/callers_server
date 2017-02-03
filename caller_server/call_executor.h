@@ -45,12 +45,20 @@ private:
 };
 
 class caller_executor_pool;
+
+class  executor_pool_base : public boost::noncopyable
+{
+public:
+    virtual  void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) = 0;
+    virtual ~executor_pool_base()
+    {}
+};
 class call_executor
     : //public CInteractor,
       public boost::enable_shared_from_this<call_executor>
 {
 public:
-    call_executor();
+    call_executor(executor_pool_base & pool);
     virtual ~call_executor();
 
 
@@ -69,7 +77,7 @@ public:
     }
 
     boost::asio::io_service *  m_pio_service;
-    caller_executor_pool * m_pool;
+    executor_pool_base & m_pool;
 protected:
 
 private:
@@ -78,11 +86,11 @@ private:
 };
 
 
-class caller_executor_pool : public boost::noncopyable
+class caller_executor_pool: public executor_pool_base
 {
 
     caller_executor_pool( boost::asio::io_service & io_service_):
-        m_call_executor(), m_io_service(io_service_)
+        m_io_service(io_service_), m_call_executor(*this)
     {
 
     }
@@ -102,6 +110,10 @@ public:
         // m_client_app .reset(); //erase(participant);
     }
 
+   void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
+   {
+       client->deliver(msg);
+   }
 
     void deliver(CCompanyTask const& msg, CInteractor_ptr client)
     {
@@ -145,12 +157,12 @@ private:
     enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
-    call_executor m_call_executor;
-    //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
+ //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
     // std::set<CCompanyTask, CompaniesSorter>
     std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
     // server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
+    call_executor m_call_executor;
 };
 
 
