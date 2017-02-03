@@ -8,6 +8,8 @@
 #include <mutex>
 #include "common.h"
 
+
+typedef  std::lock_guard<std::mutex> default_mlock;
 typedef std::deque<CServerStatus> server_status_queue;
 
 //----------------------------------------------------------------------
