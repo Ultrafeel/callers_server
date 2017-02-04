@@ -40,6 +40,53 @@ public:
   {
   }
 
+
+  /// Asynchronously write a data structure to the socket.
+  template <typename T, typename Handler>
+  void sync_write(const T& t, Handler handler)
+  {
+    // Serialize the data first so we know how large it is.
+    std::ostringstream archive_stream;
+    boost::archive::text_oarchive archive(archive_stream);
+    archive << t;
+    outbound_data_ = archive_stream.str();
+
+    // Format the header.
+    std::ostringstream header_stream;
+    header_stream << std::setw(header_length)
+      << std::hex << outbound_data_.size();
+    if (!header_stream || header_stream.str().size() != header_length)
+    {
+      // Something went wrong, inform the caller.
+      boost::system::error_code error(boost::asio::error::invalid_argument);
+      socket_.get_io_service().post(boost::bind(handler, error));
+      return;
+    }
+    outbound_header_ = header_stream.str();
+
+    // Write the serialized data to the socket. We use "gather-write" to send
+    // both the header and the data in a single write operation.
+    std::vector<boost::asio::const_buffer> buffers;
+    buffers.push_back(boost::asio::buffer(outbound_header_));
+    buffers.push_back(boost::asio::buffer(outbound_data_));
+    boost::asio::async_write(socket_, buffers, handler);
+  }
+
+  /// Asynchronously read a data structure from the socket.
+  template <typename T, typename Handler>
+  void sync_read(T& t, Handler handler)
+  {
+
+    //   boost::asio::io_service io_service;
+   // boost::asio::ip::tcp::socket socket( io_service );
+    boost::asio::ip::tcp::iostream stream;
+    stream.rdbuf()->assign( boost::asio::ip::tcp::v4(), socket_.native() );
+
+
+    // Issue a read operation to read exactly the number of bytes in a header.
+
+  }
+
   /// Get the underlying socket. Used for making a connection or for accepting
   /// an incoming connection.
   boost::asio::ip::tcp::socket& socket()

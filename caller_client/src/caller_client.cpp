@@ -118,7 +118,7 @@ private:
 //        }
 //    }
 
-    void do_write(CCompanyTask msg)
+    void do_write(CCompanyTask const& msg)
     {
         bool write_in_progress = !write_msgs_.empty();
         write_msgs_.push_back(msg);
@@ -130,50 +130,13 @@ private:
                 boost::bind(&Caller_client::handle_write, this,
                             boost::asio::placeholders::error));
         }
-    }
-    void handle_write(const boost::system::error_code& error)
-    {
-        return handle_write_intrenal(error, false);
-    }
-    void handle_write_intrenal(const boost::system::error_code& error, bool finished)
-    {
-        if (!error)
-        {
-            if (!finished)
-            {
-                write_msgs_.pop_front();
-                if (!write_msgs_.empty())
-                {
+
                     socket_.async_write(
                         write_msgs_.front(), //boost::asio::buffer(write_msgs_.front().data(),
                         //   write_msgs_.front().length()),
                         boost::bind(&Caller_client::handle_write, this,
                                     boost::asio::placeholders::error));
-                }
-                else
-                {
-                    CCompanyTask ct(TCompanyTask {CCompanyTask::getTerminatedName()});
-                    socket_.async_write(
-                        ct,//boost::asio::buffer(write_msgs_.front().data(),
-                        //   write_msgs_.front().length()),
-                        boost::bind(&Caller_client::handle_write_intrenal, this,
-                                    boost::asio::placeholders::error, true));
-                }
-            }
-            else
-            {
-                std::cout << __FUNCTION__ << ": finished transmitting Companies. " << std::endl;
-            }
-
-        }
-        else
-        {
-            std::cout << __FUNCTION__ << ": error " << error << std::endl;
-
-            do_close();
-        }
     }
-
     void do_close()
     {
         std::cout << " client closing " << std::endl;
@@ -244,10 +207,21 @@ int main(int argc, char* argv[])
 
         boost::asio::io_service io_service;
 
-        tcp::resolver resolver(io_service);
-        tcp::resolver::query query(itServAddr->second, itPortStr->second);
+//        tcp::resolver resolver(io_service);
+//        tcp::resolver::query query(itServAddr->second, itPortStr->second);
+//
+//        tcp::resolver::iterator iterator = resolver.resolve(query);
+//
+        tcp::iostream s(itServAddr->second, itPortStr->second);
+    if (!s)
+    {
+      std::cout << "Unable to connect: " << s.error().message() << std::endl;
+      return 1;
+    }
 
-        tcp::resolver::iterator iterator = resolver.resolve(query);
+    std::string line;
+    std::getline(s, line);
+   // std::cout << line << std::endl;
 
         Caller_client c(io_service, iterator);
 
