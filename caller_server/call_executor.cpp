@@ -35,5 +35,6 @@ void call_executor::CallCompanyTask(CTask_to_handle const& th)
             m_pool.deliver_to_client(client ,CServerStatus("  call to abonent : " + us.m_name + " finished"));
         }
         m_pool.deliver_to_client(client ,CServerStatus( ct.m_comp_name + " ended." ));
+        m_pool.CheckIfLeft(client);
 
     }

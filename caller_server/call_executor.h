@@ -113,8 +113,7 @@ public:
     void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
     {
         client->deliver(msg);
-        CheckIfLeft(client);
-    }
+     }
     boost::asio::io_service& get_io_serv() override
     {
         return m_io_service;
