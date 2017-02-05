@@ -47,9 +47,9 @@ public:
                                                boost::asio::placeholders::error));
     }
 
-    void write(const CCompanyTask& msg)
+     void write(const TInitiaWriteData& msgs)
     {
-        io_service_.post(boost::bind(&Caller_client::do_write, this, msg));
+        io_service_.post(boost::bind(&Caller_client::do_write, this, boost::ref(msgs)));
     }
 
     void close()
@@ -64,11 +64,6 @@ private:
         if (!error)
         {
             std::cout << " Connected " << std::endl;
-
-            socket_.async_read(
-                read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
-                boost::bind(&Caller_client::handle_read_response, this,
-                            boost::asio::placeholders::error));
         }
         else
             std::cout << __FUNCTION__ << ": error " << error << std::endl;
@@ -81,7 +76,7 @@ private:
             using namespace std;
             if (read_msg_.isLastMark())
             {
-                  cout << "server: nothing : " <<  read_msg_.message << endl;
+                cout << "server: nothing : " <<  read_msg_.message << endl;
                 close();
             }
             else
@@ -118,52 +113,29 @@ private:
 //        }
 //    }
 
-    void do_write(CCompanyTask const& msg)
+    void do_write(TInitiaWriteData const& msg)
     {
-        bool write_in_progress = !write_msgs_.empty();
-        write_msgs_.push_back(msg);
-        if (!write_in_progress)
-        {
-            socket_.async_write(
-                write_msgs_.front(),// boost::asio::buffer(write_msgs_.front().data(),
-                // write_msgs_.front().length()),
-                boost::bind(&Caller_client::handle_write, this,
-                            boost::asio::placeholders::error));
-        }
+        socket_.async_write(
+            msg,// boost::asio::buffer(write_msgs_.front().data(),
+            // write_msgs_.front().length()),
+            boost::bind(&Caller_client::handle_write, this,
+                        boost::asio::placeholders::error));
     }
     void handle_write(const boost::system::error_code& error)
     {
-        return handle_write_intrenal(error, false);
-    }
-    void handle_write_intrenal(const boost::system::error_code& error, bool finished)
-    {
         if (!error)
         {
-            if (!finished)
-            {
-                write_msgs_.pop_front();
-                if (!write_msgs_.empty())
-                {
-                    socket_.async_write(
-                        write_msgs_.front(), //boost::asio::buffer(write_msgs_.front().data(),
-                        //   write_msgs_.front().length()),
-                        boost::bind(&Caller_client::handle_write, this,
-                                    boost::asio::placeholders::error));
-                }
-                else
-                {
-                    CCompanyTask ct(TCompanyTask {CCompanyTask::getTerminatedName()});
-                    socket_.async_write(
-                        ct,//boost::asio::buffer(write_msgs_.front().data(),
-                        //   write_msgs_.front().length()),
-                        boost::bind(&Caller_client::handle_write_intrenal, this,
-                                    boost::asio::placeholders::error, true));
-                }
-            }
-            else
-            {
-                std::cout << __FUNCTION__ << ": finished transmitting Companies. " << std::endl;
-            }
+
+            std::cout << __FUNCTION__ << ": finished transmitting Companies. " << std::endl;
+
+            std::cout << __FUNCTION__ << ": start mode 2: listen server response. " << std::endl;
+
+            socket_.async_read(
+                read_msg_, //boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+                boost::bind(&Caller_client::handle_read_response, this,
+                            boost::asio::placeholders::error));
+
+
 
         }
         else
@@ -251,19 +223,19 @@ int main(int argc, char* argv[])
 
         Caller_client c(io_service, iterator);
 
-        boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
         // char line[CCompanyTask::max_message_length + 1];
         // while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
-        for ( CCompanyTask & msg : cr.m_tasks)
-        {
-            // using namespace std; // For strlen and memcpy.
-            //CCompanyTask msg=  TCompanyTask { line };
+//        for ( CCompanyTask & msg : cr.m_tasks)
+//        {
+        // using namespace std; // For strlen and memcpy.
+        //CCompanyTask msg=  TCompanyTask { line };
 //            msg.body_length(strlen(line));
 //            memcpy(msg.body(), line, msg.body_length());
 //            msg.encode_header();
-            c.write(msg);
-        }
+        c.write(cr.m_tasks);
+//        }
+       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
         //c.close();
         t.join();

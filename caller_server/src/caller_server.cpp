@@ -57,6 +57,12 @@ public:
         return m_socket.socket();
     }
 
+    void leave()
+    {
+
+       std::cout<< " Client"<<   endpoint() << "leave " << endl;
+        m_caller.leave(shared_from_this());
+    }
     void start()
     {
         m_caller.join(shared_from_this());
@@ -65,7 +71,7 @@ public:
     }
     void async_read_msg()
     {
-        current_companyTask.reset(new CCompanyTask());
+        current_companyTask.reset(new TInitiaWriteData());
         m_socket.async_read(*current_companyTask,
                             // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                             boost::bind(
@@ -100,16 +106,10 @@ public:
     {
         if (!error  )
         {
-            if (  current_companyTask->IsTerminatorCompany() )
-            {
-                  std::cout << __FUNCTION__ << ": all client's companies have been read  " << std::endl;
-            }
-            else
-            {
-                m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
-                async_read_msg();
 
-            }
+            m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
+            //async_read_msg();
+            std::cout << __FUNCTION__ << " : Companies from " <<  endpoint() << " delivered" << std::endl;
             //m_socket.
             // m_caller.CallCompanyTask()
 
@@ -120,9 +120,10 @@ public:
         }
         else
         {
-            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+            std::cout << __FUNCTION__ << ": Getting companies from " << endpoint() <<
+             ": error " << error << std::endl;
 
-            m_caller.leave(shared_from_this());
+            leave();
         }
     }
 //
@@ -150,7 +151,7 @@ private:
             {
                 default_mlock l1(write_msg_mutex);
 
-                isEnd = !(!write_msgs_.empty() && caller_executor_pool::endMessage != write_msgs_.front().message);
+                isEnd = !(!write_msgs_.empty() && write_msgs_.front().isLastMark());//caller_executor_pool::endMessage != write_msgs_.front().message);
 
                 write_msgs_.pop_front();
             }
@@ -174,15 +175,15 @@ private:
 
             }
             if (isEnd)
-                m_caller.leave(shared_from_this());
-
-
+            {
+                leave();
+            }
         }
         else
         {
             std::cout << __FUNCTION__ << ": error " << error << std::endl;
 
-            m_caller.leave(shared_from_this());
+           leave();
         }
     }
 
@@ -192,9 +193,14 @@ private:
 
     serialize_sock::connection m_socket;
     caller_executor_pool& m_caller;
-    std::unique_ptr<CCompanyTask> current_companyTask;
+    //TInitiaWriteData
+    std::unique_ptr<TInitiaWriteData> current_companyTask;
     // chat_message read_msg_;
-
+   // std::string client_addr;
+   boost::asio::ip::tcp::socket::endpoint_type endpoint()
+   {
+      return  m_socket.socket().remote_endpoint();
+   }
     std::mutex write_msg_mutex;
 
     server_status_queue write_msgs_;

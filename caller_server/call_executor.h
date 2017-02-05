@@ -120,7 +120,7 @@ public:
         return m_io_service;
     }
 
-    void deliver(CCompanyTask const& msg, CInteractor_ptr client)
+    void deliver(TInitiaWriteData & msg, CInteractor_ptr client)
     {
 
         CTask_to_handle task1;
@@ -129,7 +129,16 @@ public:
             // read_queue.emplace(*current_companyTask.release());
 
             //CallCompanyTask(msg);
-            read_queue.emplace(CTask_to_handle{ msg, client});
+           // std::move(msg.begin(), msg.end(), read_queue.end());
+
+           while (!msg.empty())
+           {
+               //CCompanyTask & comp :
+                read_queue.emplace(CTask_to_handle{ std::move(msg.front()), client});
+                msg.pop_front();
+           }
+         // emplace(CTask_to_handle{ msg, client});
+
             auto top = read_queue.begin();
             task1 = *top;
             read_queue.erase(top);

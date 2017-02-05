@@ -67,5 +67,6 @@ protected:
 
 private:
 };
+typedef  std::deque<CCompanyTask> TInitiaWriteData;
 
 #endif // CCOMPANYTASK_H
