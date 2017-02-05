@@ -118,7 +118,7 @@ private:
 //        }
 //    }
 
-    void do_write(CCompanyTask msg)
+    void do_write(CCompanyTask const& msg)
     {
         bool write_in_progress = !write_msgs_.empty();
         write_msgs_.push_back(msg);
