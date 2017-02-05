@@ -216,7 +216,7 @@ public:
     call_server(boost::asio::io_service& io_service,
                 const tcp::endpoint& endpoint)
         : io_service_(io_service),
-          acceptor_(io_service, endpoint), m_caller(io_service)//caller_executor_pool
+          acceptor_(io_service, endpoint), m_callers_pool(io_service)//caller_executor_pool
     {
         // io_service_
         start_accept();
@@ -224,7 +224,7 @@ public:
 
     void start_accept()
     {
-        chat_session_ptr new_session(new client_listen_session(io_service_, m_caller));
+        chat_session_ptr new_session(new client_listen_session(io_service_, m_callers_pool));
         acceptor_.async_accept(new_session->socket(),
                                boost::bind(&call_server::handle_accept, this, new_session,
                                            boost::asio::placeholders::error));
@@ -248,7 +248,7 @@ public:
 private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
-    caller_executor_pool m_caller;
+    caller_executor_pool m_callers_pool;
 };
 
 //typedef boost::shared_ptr<chat_server> chat_server_ptr;

@@ -4,6 +4,8 @@
 #include <string>
 #include <deque>
 #include <vector>
+//for shared_ptr
+#include <memory>
 
 //__cdecl
 size_t  strnlen_sm(const char *str, size_t maxsize);
@@ -68,5 +70,6 @@ protected:
 private:
 };
 typedef  std::deque<CCompanyTask> TInitiaWriteData;
+typedef  std::shared_ptr<CCompanyTask> CCompanyTask_ptr;
 
 #endif // CCOMPANYTASK_H

@@ -17,7 +17,7 @@ typedef boost::shared_ptr<CInteractor> CInteractor_ptr;
 
 struct CTask_to_handle
 {
-    CCompanyTask m_task;
+    CCompanyTask_ptr m_task;
     CInteractor_ptr m_client;
 };
 

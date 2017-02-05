@@ -39,7 +39,7 @@ struct CHandleTaskSorter
 {
     bool operator () (CTask_to_handle const & t1, CTask_to_handle const & t2) const
     {
-        return m_cs(t1.m_task, t2.m_task);
+        return m_cs(*t1.m_task, *t2.m_task);
     }
 private:
     CompaniesSorter m_cs;
@@ -66,7 +66,7 @@ public:
 
 
 
-    void Proc(CTask_to_handle & task)
+    void Proc(CTask_to_handle   task)
     {
         m_pool.get_io_serv().post(boost::bind(&call_executor::CallCompanyTask, this, task));
     }
@@ -113,7 +113,7 @@ public:
     void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
     {
         client->deliver(msg);
-     }
+    }
     boost::asio::io_service& get_io_serv() override
     {
         return m_io_service;
@@ -128,21 +128,24 @@ public:
             // read_queue.emplace(*current_companyTask.release());
 
             //CallCompanyTask(msg);
-           // std::move(msg.begin(), msg.end(), read_queue.end());
+            // std::move(msg.begin(), msg.end(), read_queue.end());
 
-           while (!msg.empty())
-           {
-               //CCompanyTask & comp :
-                read_queue.emplace(CTask_to_handle{ std::move(msg.front()), client});
+            while (!msg.empty())
+            {
+                //CCompanyTask & comp :
+                read_queue.emplace(CTask_to_handle
+                {
+                    CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))), client});
                 msg.pop_front();
-           }
-         // emplace(CTask_to_handle{ msg, client});
+            }
+            // emplace(CTask_to_handle{ msg, client});
 
             auto top = read_queue.begin();
             task1 = *top;
             read_queue.erase(top);
         }
         m_call_executor.Proc(task1);
+
     }
 
     void CheckIfLeft(CInteractor_ptr client) override
@@ -172,7 +175,31 @@ public:
             client->deliver(endStatus);
         }
         else
+        {
             client->deliver(CServerStatus("Have some your tasks"));
+
+
+        }
+
+        //load next
+        {
+
+            std::lock_guard<std::mutex> lock(m_queue_m);
+
+            if (!read_queue.empty())
+            {
+
+                auto top = read_queue.begin();
+                CTask_to_handle task1 = *top;
+                read_queue.erase(top);
+
+                m_call_executor.Proc(task1);
+            }
+            // else
+            // {   assert(task
+
+        }
+
 
 //        recent_msgs_.push_back(msg);
 //        while (recent_msgs_.size() > max_recent_msgs)
@@ -184,17 +211,17 @@ public:
     }
 
 private:
-    //client_app_ptr  m_client_app;
-    //holds pointers.
+//client_app_ptr  m_client_app;
+//holds pointers.
     std::set<CInteractor_ptr> m_client_sessions;
-   // std::set<CInteractor_weak_ptr> m_client_sessions;
-    // enum { max_recent_msgs = 100 };
+// std::set<CInteractor_weak_ptr> m_client_sessions;
+// enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
 
 //std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
-    // std::set<CCompanyTask, CompaniesSorter>
+// std::set<CCompanyTask, CompaniesSorter>
     std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
-    // server_status_queue recent_msgs_;
+// server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
     call_executor m_call_executor;
 };
