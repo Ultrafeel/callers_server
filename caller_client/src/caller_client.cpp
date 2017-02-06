@@ -209,7 +209,11 @@ int main(int argc, char* argv[])
 
 
     CCompaniesReader cr(compTasks);
-    cr.OpenAndReadTasks();
+    if (!cr.OpenAndReadTasks())
+    {
+         cout << " failed to parse " << compTasks << endl;
+         return 1;
+    }
 
     try
     {

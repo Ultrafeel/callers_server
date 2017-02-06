@@ -24,6 +24,7 @@ companies
      "pupkin" "222-33"
      "vitin"  "243-34"
    }
+}
 "comp 3" {
     priority 3
     adv "comp 3"

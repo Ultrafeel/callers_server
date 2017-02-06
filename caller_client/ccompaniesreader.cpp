@@ -34,7 +34,15 @@ bool CCompaniesReader::OpenAndReadTasks()
     boost::property_tree::ptree pt;
     if (m_path.empty())
         m_path = path;
-    boost::property_tree::info_parser::read_info(m_path, pt);// "config.ini",
+    try
+    {
+        boost::property_tree::info_parser::read_info(m_path, pt);// "config.ini",
+    }
+    catch(std::exception &ex)
+    {
+        std::cerr<< ex.what() << std::endl;
+        return false;
+    }
     auto p =  pt.get_optional<std::string>("Task.Users.");
     if (p)
         std::cout << *p << std::endl;
