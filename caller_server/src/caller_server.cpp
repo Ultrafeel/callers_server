@@ -151,7 +151,7 @@ private:
             {
                 default_mlock l1(write_msg_mutex);
                 //!(!write_msgs_.empty() &&
-                isEnd =  write_msgs_.front().isLastMark());//caller_executor_pool::endMessage != write_msgs_.front().message);
+                isEnd =  write_msgs_.front().isLastMark();//caller_executor_pool::endMessage != write_msgs_.front().message);
 
                 write_msgs_.pop_front();
 
