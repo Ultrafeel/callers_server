@@ -95,19 +95,15 @@ public:
     static char  const * endMessage ;//= "\n All tasks end";
     void join(CInteractor_ptr participant)
     {
-        m_client_sessions.insert(participant);
-//        std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
-//                      boost::bind(&client_app::deliver, participant, _1));
         using namespace std;
         cout << __FUNCTION__ << " join" << endl;
 
     }
 
-    void leave(CInteractor_ptr participant)
+    void leave(CInteractor_ptr /*participant*/)
     {
         using namespace std;
         cout << __FUNCTION__ << " ." << endl;
-        m_client_sessions.erase(participant);
     }
 
     void deliver_to_client(CInteractor_ptr client, CServerStatus const& msg) override
