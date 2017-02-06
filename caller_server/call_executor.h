@@ -209,7 +209,7 @@ public:
 private:
 //client_app_ptr  m_client_app;
 //holds pointers.
-    std::set<CInteractor_ptr> m_client_sessions;
+  //  std::set<CInteractor_ptr> m_client_sessions;
 // std::set<CInteractor_weak_ptr> m_client_sessions;
 // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
