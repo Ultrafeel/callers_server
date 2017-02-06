@@ -28,13 +28,13 @@ struct CompaniesSorter
 {
     bool operator () (CCompanyTask const & t1, CCompanyTask const & t2) const
     {
-        if (t1.m_priority > t2.m_priority)
+        if (t1.m_priority < t2.m_priority)
             return true;
         else if(t1.m_priority != t2.m_priority)
             return false;
         else
         {
-            bool result = (t1.m_abonents.size() < t2.m_abonents.size());
+            bool result = (t1.m_abonents.size() > t2.m_abonents.size());
             return result;
         }
     }
