@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #include <queue>
 #include <deque>
@@ -72,14 +73,21 @@ public:
 
     void Proc(CTask_to_handle   task)
     {
-        m_pool.get_io_serv().post(boost::bind(&call_executor::CallCompanyTask, this, task));
+        //m_pool.get_io_serv()
+        m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
+        if (!t.joinable() )
+            t = boost::thread(boost::bind(&boost::asio::io_service::run, &m_io_service));
+
     }
 
-    boost::asio::io_service *  m_pio_service;
+    boost::asio::io_service   m_io_service;
+
     executor_pool_base & m_pool;
-protected:
+
 
 private:
+    boost::thread t;
+
     void CallCompanyTask(CTask_to_handle const& th);
 
 };
