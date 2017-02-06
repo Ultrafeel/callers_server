@@ -4,7 +4,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
-#include <set>
+
+#include <queue>
+#include <deque>
+//#include <set>
+
 #include <assert.h>
 #include <mutex>
 #include <iostream>
@@ -136,9 +140,9 @@ public:
             }
             // emplace(CTask_to_handle{ msg, client});
 
-            auto top = read_queue.begin();
-            task1 = *top;
-            read_queue.erase(top);
+
+            task1 = read_queue.top();
+            read_queue.pop();
         }
         m_call_executor.Proc(task1);
 
@@ -150,7 +154,7 @@ public:
         bool tasks_left = false;
         {
             std::lock_guard<std::mutex> lock(m_queue_m);
-            for (CTask_to_handle const& thi : read_queue)
+            for (CTask_to_handle const& thi : read_queue.GetCont())
             {
                 if (thi.m_client == client)//.get()
                 {
@@ -185,9 +189,9 @@ public:
             if (!read_queue.empty())
             {
 
-                auto top = read_queue.begin();
-                CTask_to_handle task1 = *top;
-                read_queue.erase(top);
+
+                CTask_to_handle task1 =  read_queue.top();
+                read_queue.pop();
 
                 m_call_executor.Proc(task1);
             }
@@ -213,10 +217,23 @@ private:
 // std::set<CInteractor_weak_ptr> m_client_sessions;
 // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
+    typedef    std::priority_queue<CTask_to_handle, std::deque<CTask_to_handle>, CHandleTaskSorter>
+            TCont;
 
-//std::priority_queue<CCompanyTask, std::list<CCompanyTask>, CompaniesSorter>
+   struct UnProtectCont : public TCont
+   {
+
+        TCont::container_type const & GetCont() const
+        {
+            return c;
+        }
+   };
+  UnProtectCont read_queue;
+
+
+
 // std::set<CCompanyTask, CompaniesSorter>
-    std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
+   // std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
 // server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
     call_executor m_call_executor;
