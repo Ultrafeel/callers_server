@@ -49,6 +49,7 @@
 			<Add option="-lsettings_read" />
 			<Add option="-lboost_serialization" />
 			<Add option="-lboost_thread" />
+			<Add option="-lboost_chrono" />
 			<Add directory="/usr/share/boost_extr/boost_1_63_0/stage/lib" />
 			<Add directory="../settings_read/bin/$(currconf)" />
 			<Add directory="../settings_read/bin/$(TARGET_NAME)" />
