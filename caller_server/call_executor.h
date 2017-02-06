@@ -75,8 +75,14 @@ public:
     {
         //m_pool.get_io_serv()
         m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
-        if (!t.joinable() )
-            t = boost::thread(boost::bind(&boost::asio::io_service::run, &m_io_service));
+        std::unique_ptr<boost::thread> t2(t.release());
+        if (!t2.get())// || !t2->joinable() )
+         {
+             if (!t2->try_join_for(boost::chrono::milliseconds(0)))
+                t2.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io_service)));
+            else
+                t.reset(t2.release());
+         }
 
     }
 
@@ -86,7 +92,7 @@ public:
 
 
 private:
-    boost::thread t;
+    std::unique_ptr<boost::thread> t;
 
     void CallCompanyTask(CTask_to_handle const& th);
 
