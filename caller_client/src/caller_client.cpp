@@ -76,7 +76,7 @@ private:
             using namespace std;
             if (read_msg_.isLastMark())
             {
-                cout << "server: nothing : " <<  read_msg_.message << endl;
+                cout << "server: have not any of your company task: " <<  read_msg_.message << endl;
                 close();
             }
             else
