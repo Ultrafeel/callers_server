@@ -29,9 +29,11 @@ using namespace std;
 
 bool CCompaniesReader::OpenAndReadTasks()
 {
-    auto m_path = "companies_test.info";
+   static const auto path = "companies_test.info";
     using namespace boost::property_tree;
     boost::property_tree::ptree pt;
+    if (m_path.empty())
+        m_path = path;
     boost::property_tree::info_parser::read_info(m_path, pt);// "config.ini",
     auto p =  pt.get_optional<std::string>("Task.Users.");
     if (p)
