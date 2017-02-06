@@ -20,18 +20,17 @@ companies
     adv "comp 2"
  
    Users  {
-
-      "pupkin" "222-33"
-      "v"  "value split "\
-          "over three"\
-          "lines"
-        
-      a_key_without_value ""
-      "a key with special characters in it {};#\n\t\"\0" ""
-      "" value    ; Empty key with a value
-      "p" ""       ; Empty key with empty value!
+     "sonkin" "223-33"
+     "pupkin" "222-33"
+     "vitin"  "243-34"
    }
-
-   
-}
+"comp 3" {
+    priority 3
+    adv "comp 3"
+ 
+   Users  {
+      "irkin" "123435"
+      "pupkin" "222-33"
+    }
+ }
 }
