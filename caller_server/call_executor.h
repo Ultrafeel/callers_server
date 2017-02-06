@@ -76,22 +76,32 @@ public:
         //m_pool.get_io_serv()
         m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
         std::unique_ptr<boost::thread> t2(t.release());
-        if (!t2.get())// || !t2->joinable() )
-         {
-             if (!t2->try_join_for(boost::chrono::milliseconds(0)))
-                t2.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io_service)));
+        if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
+        {
+            if (m_io_service.stopped())
+                m_io_service.reset();
+            if (!t2->try_join_for(boost::chrono::milliseconds(0)))
+                t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
             else
                 t.reset(t2.release());
-         }
+        }
 
     }
 
-    boost::asio::io_service   m_io_service;
-
-    executor_pool_base & m_pool;
 
 
 private:
+    void Run()
+    {
+        m_io_service.run();
+        if (m_io_service.stopped())
+        {
+            m_io_service.reset();
+        }
+    }
+    boost::asio::io_service   m_io_service;
+
+    executor_pool_base & m_pool;
     std::unique_ptr<boost::thread> t;
 
     void CallCompanyTask(CTask_to_handle const& th);
@@ -227,27 +237,27 @@ public:
 private:
 //client_app_ptr  m_client_app;
 //holds pointers.
-  //  std::set<CInteractor_ptr> m_client_sessions;
+    //  std::set<CInteractor_ptr> m_client_sessions;
 // std::set<CInteractor_weak_ptr> m_client_sessions;
 // enum { max_recent_msgs = 100 };
     std::mutex m_queue_m;
     typedef    std::priority_queue<CTask_to_handle, std::deque<CTask_to_handle>, CHandleTaskSorter>
-            TCont;
+    TCont;
 
-   struct UnProtectCont : public TCont
-   {
+    struct UnProtectCont : public TCont
+    {
 
         TCont::container_type const & GetCont() const
         {
             return c;
         }
-   };
-  UnProtectCont read_queue;
+    };
+    UnProtectCont read_queue;
 
 
 
 // std::set<CCompanyTask, CompaniesSorter>
-   // std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
+    // std::set<CTask_to_handle,  CHandleTaskSorter>    read_queue;
 // server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
     call_executor m_call_executor;
