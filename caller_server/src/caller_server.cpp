@@ -150,15 +150,10 @@ private:
             bool isEnd;
             {
                 default_mlock l1(write_msg_mutex);
-
-                isEnd = !(!write_msgs_.empty() && write_msgs_.front().isLastMark());//caller_executor_pool::endMessage != write_msgs_.front().message);
+                //!(!write_msgs_.empty() &&
+                isEnd =  write_msgs_.front().isLastMark());//caller_executor_pool::endMessage != write_msgs_.front().message);
 
                 write_msgs_.pop_front();
-            }
-
-
-            {
-                default_mlock l2(write_msg_mutex);
 
                 //loop while write_msgs_ not empty
                 if (!write_msgs_.empty())
