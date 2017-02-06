@@ -47,11 +47,16 @@ public:
                                                boost::asio::placeholders::error));
     }
 
-     void write(const TInitiaWriteData& msgs)
+    void write(const TInitiaWriteData& msgs)
     {
         io_service_.post(boost::bind(&Caller_client::do_write, this, boost::ref(msgs)));
     }
+    typedef int TAddData;
 
+    void write2(const TAddData& msgs)
+    {
+        io_service_.post(boost::bind(&Caller_client::do_write2, this, boost::ref(msgs)));
+    }
     void close()
     {
         io_service_.post(boost::bind(&Caller_client::do_close, this));
@@ -116,11 +121,21 @@ private:
     void do_write(TInitiaWriteData const& msg)
     {
         socket_.async_write(
-            msg,// boost::asio::buffer(write_msgs_.front().data(),
+            msg, // boost::asio::buffer(write_msgs_.front().data(),
             // write_msgs_.front().length()),
             boost::bind(&Caller_client::handle_write, this,
                         boost::asio::placeholders::error));
     }
+
+    void do_write2(TAddData const& msg)
+    {
+        socket_.async_write(
+            msg, // boost::asio::buffer(write_msgs_.front().data(),
+            // write_msgs_.front().length()),
+            boost::bind(&Caller_client::handle_write, this,
+                        boost::asio::placeholders::error));
+    }
+
     void handle_write(const boost::system::error_code& error)
     {
         if (!error)
@@ -233,9 +248,10 @@ int main(int argc, char* argv[])
 //            msg.body_length(strlen(line));
 //            memcpy(msg.body(), line, msg.body_length());
 //            msg.encode_header();
+        c.write2(11);
         c.write(cr.m_tasks);
 //        }
-       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+        boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
         //c.close();
         t.join();
