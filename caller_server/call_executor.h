@@ -199,7 +199,8 @@ public:
 
             client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
 
-            CServerStatus endStatus (CServerStatus::getLastMark());
+            CServerStatus endStatus (CServerStatus::getLastMark(), CServerStatus::ELastMark);
+            assert(endStatus.isLastMark());
             client->deliver(endStatus);
         }
         else
