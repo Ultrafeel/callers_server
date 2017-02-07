@@ -82,8 +82,8 @@ public:
             if (m_io_service.stopped())
                 m_io_service.reset();
             if ((!t2.get() )||
-                ((!t2->try_join_for(boost::chrono::milliseconds(0))) &&
-                 (t2->get_id() != boost::this_thread::get_id())))
+                    ((!t2->try_join_for(boost::chrono::milliseconds(0))) &&
+                     (t2->get_id() != boost::this_thread::get_id())))
                 t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
             //else
             if (!t.get())
@@ -161,9 +161,9 @@ public:
             while (!msg.empty())
             {
                 //CCompanyTask & comp :
-                read_queue.emplace(CTask_to_handle
-                {
-                    CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))), client});
+                read_queue.emplace(CTask_to_handle{
+                      CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))),
+                                    client});
                 msg.pop_front();
             }
             // emplace(CTask_to_handle{ msg, client});
