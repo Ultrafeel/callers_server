@@ -65,7 +65,10 @@
 			<code_completion />
 			<envvars />
 			<lib_finder disable_auto="1" />
-			<debugger />
+			<debugger>
+				<search_path add="/usr/share/boost_extr/boost_1_63_0/boost/archive/impl" />
+				<search_path add="/usr/share/boost_extr/boost_1_63_0/boost/archive" />
+			</debugger>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
