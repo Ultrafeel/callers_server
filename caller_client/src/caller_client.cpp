@@ -139,8 +139,24 @@ private:
         socket_.async_write(
             msg, // boost::asio::buffer(write_msgs_.front().data(),
             // write_msgs_.front().length()),
-            boost::bind(&Caller_client::handle_write, this,
+            boost::bind(&Caller_client::handle_write2, this,
                         boost::asio::placeholders::error));
+    }
+
+    void handle_write2(const boost::system::error_code& error)
+    {
+        if (!error)
+        {
+
+            std::cout << __FUNCTION__ << ": finished transmitting Int " << std::endl;
+
+        }
+        else
+        {
+            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+
+            do_close();
+        }
     }
 
     void handle_write(const boost::system::error_code& error)
