@@ -121,9 +121,11 @@ public:
         else
         {
             std::cout << __FUNCTION__ << ": Getting companies from " << endpoint() <<
-             ": error " << error << std::endl;
+             ": error: " << error << ".\n" <<
+              " server will be terminated" << std::endl;
 
             leave();
+            exit(1); // p 3.4
         }
     }
 //
