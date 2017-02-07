@@ -42,3 +42,4 @@ caller_client/caller_client.bmarks
 *.depend
 caller_server/caller_server.cscope_file_list
 *.i
+.fuse_hidden*
