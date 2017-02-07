@@ -123,8 +123,9 @@ public:
             std::cout << __FUNCTION__ << ": Getting companies from " << endpoint() <<
              ": error: " << error << ".\n" <<
               " server will be terminated" << std::endl;
-
+            deliver( CServerStatus(CServerStatus::EServerErrorReadCompanies));
             leave();
+
             exit(1); // p 3.4
         }
     }

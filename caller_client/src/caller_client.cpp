@@ -79,6 +79,13 @@ private:
                 cout << "server: have not any of your company task: " <<  read_msg_.message << endl;
                 close();
             }
+            else if (read_msg_.m_enum == CServerStatus::EServerErrorReadCompanies)
+            {
+                cout << "server: failed: " <<  read_msg_.message << endl;
+                cout << "Cannot continue: program will be terminated. " <<  endl;
+                close();
+                exit(1); //p 2.4
+            }
             else
             {
                 cout << "currently : " <<  read_msg_.message << endl;
