@@ -12,23 +12,6 @@
 class CSettingsReader {
 public:
 	CSettingsReader(char const* path);
-
-	struct CValue
-	{
-		virtual ~CValue()
-		{
-
-		}
-		static CValue GetValue(std::string val);
-		/*
-		 CSettingsReader::CValue CSettingsReader::CValue::GetValue(std::string val)
-		 {
-
-
-		 }
-		 */
-	};
-
 	bool OpenAndRead();
 
     static std::string trimWhitesp(std::string const & str);

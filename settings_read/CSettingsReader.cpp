@@ -17,18 +17,9 @@ CSettingsReader::CSettingsReader(char const* path):m_path(path) {
 	//CSettingsReader::CValue v;
 }
 
-
  CSettingsReader::~CSettingsReader() {
 	 // TODO Auto-generated destructor stub
  }
-/* */
-
-CSettingsReader::CValue CSettingsReader::CValue::GetValue(std::string val)
-{
-
-	return CValue();
-}
-
 
 using namespace std;
 bool isspaceM(char ch)
