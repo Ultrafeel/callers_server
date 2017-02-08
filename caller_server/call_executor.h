@@ -81,15 +81,30 @@ public:
         {
             if (m_io_service.stopped())
                 m_io_service.reset();
-            if ((!t2.get() )||
-                    ((!t2->try_join_for(boost::chrono::milliseconds(0))) &&
-                     (t2->get_id() != boost::this_thread::get_id())))
-                t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
-            //else
-            if (!t.get())
-                t.reset(t2.release());
-        }
 
+            do
+            {
+                if (t2.get() )
+                {
+                    if  ((t2->try_join_for(boost::chrono::milliseconds(0)))
+                            //&& )
+                        )
+                    {
+                        //UNUSED(thisThr)  //thisThr;
+                        break;
+                    } //__attribute__((unused))
+                    bool thisThr = (t2->get_id() == boost::this_thread::get_id());
+                    if (thisThr)
+                        break;
+                }
+                t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+            }
+            while (0);
+            //else
+
+        }
+        if (t2.get())
+            t.reset(t2.release());
     }
 
 
