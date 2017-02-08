@@ -30,7 +30,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/deque.hpp>
 #include <boost/archive/text_iarchive.hpp>
-
+#include <boost/lexical_cast.hpp>
 #include "CSettingsReader.h"
 #include "../common.h"
 #include "../call_executor.h"
@@ -60,7 +60,7 @@ public:
     void leave()
     {
 
-       std::cout<< " Client"<<   endpoint() << "leave " << endl;
+        std::cout<< " Client"<<   endpoint() << "leave " << endl;
         m_caller.leave(shared_from_this());
     }
     void start()
@@ -194,11 +194,28 @@ private:
     //TInitiaWriteData
     std::unique_ptr<TInitiaWriteData> current_companyTask;
     // chat_message read_msg_;
-   // std::string client_addr;
-   boost::asio::ip::tcp::socket::endpoint_type endpoint()
-   {
-      return  m_socket.socket().remote_endpoint();
-   }
+    // std::string client_addr;
+    boost::asio::ip::tcp::socket::endpoint_type r_endpoint()
+    {
+        return  m_socket.socket().remote_endpoint();
+    }
+    std::string endpoint()
+    {
+
+        try
+        {
+            //  std::string s = tmp_ep.to_string(ec);
+            std::string s = boost::lexical_cast
+                            <std::string>( r_endpoint());
+
+            return s;
+        }
+        catch(std::exception &e)
+        {
+            return "__";
+        }
+    }
+
     std::mutex write_msg_mutex;
 
     server_status_queue write_msgs_;
