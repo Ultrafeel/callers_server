@@ -6,6 +6,7 @@
 #include <vector>
 //for shared_ptr
 #include <memory>
+#include <stdint.h>
 
 //__cdecl
 size_t  strnlen_sm(const char *str, size_t maxsize);
@@ -25,8 +26,8 @@ public:
 
 struct TCompanyTask
 {
-    std::string m_comp_name;
-    uint16_t            m_priority;
+    std::string  m_comp_name;
+    uint16_t     m_priority;
     std::string  m_advertise;
 
     std::deque<CAbonent> m_abonents;

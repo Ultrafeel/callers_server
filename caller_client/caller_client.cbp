@@ -12,10 +12,6 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option parameters="ct1.info" />
-				<Compiler>
-					<Add option="-std=c++11" />
-					<Add option="-g" />
-				</Compiler>
 				<Environment>
 					<Variable name="currconf" value="Debug" />
 				</Environment>
@@ -38,6 +34,8 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-g" />
 			<Add option="-fexceptions" />
 			<Add directory="../settings_read" />
 			<Add directory="/usr/share/boost_extr/boost_1_63_0" />
