@@ -27,13 +27,13 @@ void call_executor::CallCompanyTask(CTask_to_handle const& th)
     CCompanyTask  const& ct = *th.m_task;
     cout << "task :";
     cout << ct.m_comp_name << ". priority : " << ct.m_priority << "\n user count: " << ct.m_abonents.size() << endl ;
-    m_pool.deliver_to_client(client,CServerStatus( "compon name " +  ct.m_comp_name));
+    m_pool.deliver_to_client(client,CServerStatus( "Company name :" +  ct.m_comp_name));
     size_t iu = 0;
     for (CAbonent const& us : ct.m_abonents)
     {
         cout << ++iu << ". Calling abonent " << us.m_name << " num:" << us.m_number<< endl;
         //emulate call
-        cout << "adv : " << ct.m_advertise<< "." << endl;
+        cout << "advertise : " << ct.m_advertise<< "." << endl;
         sleep(1);
 
         m_pool.deliver_to_client(client,CServerStatus("  call to abonent : " + us.m_name + " finished"));

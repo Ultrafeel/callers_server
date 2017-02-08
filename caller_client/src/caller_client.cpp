@@ -66,7 +66,7 @@ private:
             std::cout << " Connected " << std::endl;
         }
         else
-            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+            std::cout << "Cannot connect to server. (" << __FUNCTION__ << ": error " << error << ")" <<std::endl;
     }
 
     void handle_read_response(const boost::system::error_code& error)
@@ -122,6 +122,12 @@ private:
 
     void do_write(TInitiaWriteData const& msg)
     {
+        if (!socket_.socket().is_open())
+        {
+            std::cout<< " Socket is not oppened." << __FUNCTION__ << std::endl;
+            //exit(EXIT_FAILURE); // p1.1
+            return;
+        }
         socket_.async_write(
             msg,// boost::asio::buffer(write_msgs_.front().data(),
             // write_msgs_.front().length()),
