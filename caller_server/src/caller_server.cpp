@@ -93,6 +93,9 @@ public:
             default_mlock l2(write_msg_mutex);
             if (!write_msgs_.empty())
             {
+                if (write_msgs_.front().isLastMark())
+                    cout <<  " No tasks left for:" << endpoint()<<endl;
+
                 m_socket.async_write(
                     write_msgs_.front(),//  boost::asio::buffer(write_msgs_.front().data(),
                     // write_msgs_.front().length()),
@@ -121,8 +124,8 @@ public:
         else
         {
             std::cout << __FUNCTION__ << ": Getting companies from " << endpoint() <<
-             ": error: " << error << ".\n" <<
-              " server will be terminated" << std::endl;
+                      ": error: " << error << ".\n" <<
+                      " server will be terminated" << std::endl;
             deliver( CServerStatus(CServerStatus::EServerErrorReadCompanies));
             leave();
 
@@ -181,7 +184,7 @@ private:
         {
             std::cout << __FUNCTION__ << ": error " << error << std::endl;
 
-           leave();
+            leave();
         }
     }
 

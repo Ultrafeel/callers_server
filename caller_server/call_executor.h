@@ -176,9 +176,10 @@ public:
             while (!msg.empty())
             {
                 //CCompanyTask & comp :
-                read_queue.emplace(CTask_to_handle{
-                      CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))),
-                                    client});
+                read_queue.emplace(CTask_to_handle
+                {
+                    CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))),
+                    client});
                 msg.pop_front();
             }
             // emplace(CTask_to_handle{ msg, client});
@@ -210,7 +211,6 @@ public:
         }
         if (!tasks_left)
         {
-            cout <<  " No tasks left." << endl;
 
             client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
 
