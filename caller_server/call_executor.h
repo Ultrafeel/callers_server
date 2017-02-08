@@ -195,7 +195,7 @@ public:
         }
         if (!tasks_left)
         {
-            cout << __FUNCTION__ << " no tasks_left ." << endl;
+            cout <<  " No tasks left." << endl;
 
             client->deliver(CServerStatus(caller_executor_pool::endMessage)); // "All tasks end"
 
