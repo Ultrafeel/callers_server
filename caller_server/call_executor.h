@@ -75,7 +75,7 @@ public:
     {
         //m_pool.get_io_serv()
         m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
-        std::unique_ptr<boost::thread> t2(t.release());
+        std::unique_ptr<boost::thread> &t2  = t;//.release();
         //create thread if necessary.
         //if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
 
@@ -117,9 +117,9 @@ public:
             while (0);
         //else
 
-
-        if (t2.get())
-            t.reset(t2.release());
+//
+//        if (t2.get())
+//            t.reset(t2.release());
     }
 
 
