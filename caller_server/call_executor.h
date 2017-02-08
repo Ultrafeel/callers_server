@@ -20,7 +20,7 @@ typedef  std::lock_guard<std::mutex> default_mlock;
 typedef std::deque<CServerStatus> server_status_queue;
 
 //----------------------------------------------------------------------
-
+int procTC();
 //----------------------------------------------------------------------
 using namespace std;
 
@@ -78,8 +78,17 @@ public:
         std::unique_ptr<boost::thread> t2(t.release());
         //create thread if necessary.
         //if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
-        {
 
+
+        if (m_io_service.stopped() ||!t2.get())//
+        {
+            if (m_io_service.stopped())
+                m_io_service.reset();
+            assert(procTC() <= 1);  //boost::this_thread::get_id()breakpoint place
+
+            t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+        }
+        else
             do
             {
                 if (t2.get() )
@@ -94,16 +103,21 @@ public:
                     bool thisThr = (t2->get_id() == boost::this_thread::get_id());
                     if (thisThr)
                         break;
+                    if (!m_io_service.stopped())
+                        break;
+
                 }
+
                 if (m_io_service.stopped())
                     m_io_service.reset();
+                assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
 
                 t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
             }
             while (0);
-            //else
+        //else
 
-        }
+
         if (t2.get())
             t.reset(t2.release());
     }
@@ -114,10 +128,10 @@ private:
     void Run()
     {
         m_io_service.run();
-        if (m_io_service.stopped())
-        {
-            m_io_service.reset();
-        }
+//        if (m_io_service.stopped())
+//        {
+//            m_io_service.reset();
+//        }
     }
     boost::asio::io_service   m_io_service;
     friend class call_server;
