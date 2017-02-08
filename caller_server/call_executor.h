@@ -80,15 +80,15 @@ public:
         //if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
 
 
-        if (m_io_service.stopped() ||!t2.get())//
+       // if (m_io_service.stopped() ||!t2.get())//
         {
-            if (m_io_service.stopped())
-                m_io_service.reset();
+         //  if (m_io_service.stopped())
+         //       m_io_service.reset();
             assert(procTC() <= 1);  //boost::this_thread::get_id()breakpoint place
 
-            t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+          //  t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
         }
-        else
+        //else
             do
             {
                 if (t2.get() )
@@ -103,13 +103,13 @@ public:
                     bool thisThr = (t2->get_id() == boost::this_thread::get_id());
                     if (thisThr)
                         break;
-                    if (!m_io_service.stopped())
+                   // if (!m_io_service.stopped())
                         break;
 
                 }
 
-                if (m_io_service.stopped())
-                    m_io_service.reset();
+//                if (m_io_service.stopped())
+//                    m_io_service.reset();
                 assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
 
                 t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
@@ -127,13 +127,13 @@ public:
 private:
     void Run()
     {
-        m_io_service.run();
+        //m_io_service.run();
 //        if (m_io_service.stopped())
 //        {
 //            m_io_service.reset();
 //        }
     }
-    boost::asio::io_service   m_io_service;
+    boost::asio::io_service::strand   m_io_service;
     friend class call_server;
     executor_pool_base & m_pool;
     std::unique_ptr<boost::thread> t;
