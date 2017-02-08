@@ -64,9 +64,13 @@ private:
         if (!error)
         {
             std::cout << " Connected " << std::endl;
+            write(m_companiesToWrite);
         }
         else
+        {
             std::cout << "Cannot connect to server. (" << __FUNCTION__ << ": error " << error << ")" <<std::endl;
+            exit(EXIT_FAILURE); // p2.1
+        }
     }
 
     void handle_read_response(const boost::system::error_code& error)
@@ -124,8 +128,9 @@ private:
     {
         if (!socket_.socket().is_open())
         {
-            std::cout<< " Socket is not oppened." << __FUNCTION__ << std::endl;
-            //exit(EXIT_FAILURE); // p1.1
+            assert(!"must never to reach here");
+            std::cout<< " Socket is not opened." << __FUNCTION__ << std::endl;
+            exit(EXIT_FAILURE);
             return;
         }
         socket_.async_write(
@@ -164,8 +169,13 @@ private:
         std::cout << " client closing " << std::endl;
         socket_.socket().close();
     }
-
+public:
+    void SetData(TInitiaWriteData &data)
+    {
+        m_companiesToWrite.swap(data);
+    }
 private:
+    TInitiaWriteData m_companiesToWrite;
     boost::asio::io_service& io_service_;
     //tcp::socket
     serialize_sock::connection socket_;
@@ -235,11 +245,13 @@ int main(int argc, char* argv[])
 
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(itServAddr->second, itPortStr->second);
-
+       // std::getchar();
         tcp::resolver::iterator iterator = resolver.resolve(query);
 
         Caller_client c(io_service, iterator);
+        c.SetData(cr.m_tasks);
 
+        boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
         // char line[CCompanyTask::max_message_length + 1];
         // while (std::cin.getline(line, CCompanyTask::max_message_length + 1))
@@ -250,9 +262,7 @@ int main(int argc, char* argv[])
 //            msg.body_length(strlen(line));
 //            memcpy(msg.body(), line, msg.body_length());
 //            msg.encode_header();
-        c.write(cr.m_tasks);
 //        }
-       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
         //c.close();
         t.join();
