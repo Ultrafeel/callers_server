@@ -119,7 +119,7 @@ private:
         }
     }
     boost::asio::io_service   m_io_service;
-
+    friend class call_server;
     executor_pool_base & m_pool;
     std::unique_ptr<boost::thread> t;
 
@@ -281,6 +281,7 @@ private:
 // server_status_queue recent_msgs_;
     boost::asio::io_service & m_io_service;
     call_executor m_call_executor;
+    friend class call_server;
 };
 
 

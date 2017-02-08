@@ -263,6 +263,12 @@ public:
         start_accept();
     }
 
+    void join_caller()
+    {
+         std::cout << __FUNCTION__ << " " << std::endl;
+         assert(!" should not reach here" );
+         m_callers_pool.m_call_executor.m_io_service.run();
+    }
 private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
@@ -303,6 +309,7 @@ int main()
         tcp::endpoint endpoint(tcp::v4(), itPort->second);
         call_server server(io_service, endpoint);
         io_service.run();
+        server.join_caller();
     }
     catch (std::exception& e)
     {
