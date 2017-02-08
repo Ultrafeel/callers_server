@@ -60,7 +60,7 @@ public:
     void leave()
     {
 
-        std::cout<< " Client"<<   endpoint() << "leave " << endl;
+        std::cout<< " Client"<<   "leave " << endl; //endpoint() <<
         m_caller.leave(shared_from_this());
     }
     void start()
