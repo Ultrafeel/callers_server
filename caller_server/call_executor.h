@@ -77,10 +77,8 @@ public:
         m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
         std::unique_ptr<boost::thread> t2(t.release());
         //create thread if necessary.
-        if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
+        //if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
         {
-            if (m_io_service.stopped())
-                m_io_service.reset();
 
             do
             {
@@ -97,6 +95,9 @@ public:
                     if (thisThr)
                         break;
                 }
+                if (m_io_service.stopped())
+                    m_io_service.reset();
+
                 t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
             }
             while (0);
