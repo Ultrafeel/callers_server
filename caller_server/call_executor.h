@@ -102,34 +102,34 @@ private:
 
             t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
         }
-        else
-            do
-            {
-                if (t2.get() )
-                {
-                    if  ((t2->try_join_for(boost::chrono::milliseconds(0)))
-                            //&& )
-                        )
-                    {
-                        //UNUSED(thisThr)  //thisThr;
-                        break;
-                    } //__attribute__((unused))
-                    bool thisThr = (t2->get_id() == boost::this_thread::get_id());
-                    if (thisThr)
-                        break;
-                    // if (!m_io_service.stopped())
-                    //    break;
-
-                }
-
-                if (m_io_service.stopped())
-                    m_io_service.reset();
-                //assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
-                // m_strand_for_threads(boost::bind())
-                t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
-                // t = t2;
-            }
-            while (0);
+//        else
+//            do
+//            {
+//                if (t2.get() )
+//                {
+//                    if  ((t2->try_join_for(boost::chrono::milliseconds(0)))
+//                            //&& )
+//                        )
+//                    {
+//                        //UNUSED(thisThr)  //thisThr;
+//                        break;
+//                    } //__attribute__((unused))
+//                    bool thisThr = (t2->get_id() == boost::this_thread::get_id());
+//                    if (thisThr)
+//                        break;
+//                    // if (!m_io_service.stopped())
+//                    //    break;
+//
+//                }
+//
+//                if (m_io_service.stopped())
+//                    m_io_service.reset();
+//                //assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
+//                // m_strand_for_threads(boost::bind())
+//                t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+//                // t = t2;
+//            }
+//            while (0);
         //else
 
 
