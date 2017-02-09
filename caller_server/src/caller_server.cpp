@@ -182,7 +182,8 @@ private:
         }
         else
         {
-            std::cout << __FUNCTION__ << ": error " << error << std::endl;
+            std::cout << __FUNCTION__ << GetTickStr() << ":addr:" << endpoint()
+            <<": error " << error << std::endl;
 
             leave();
         }

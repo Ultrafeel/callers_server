@@ -3,6 +3,7 @@
 #include  <string>
 #include <algorithm>
 #include  <string.h>
+#include <chrono>
 CCompanyTask::CCompanyTask()//: m_usCount(0)
 {
     //ctor
@@ -59,3 +60,11 @@ size_t  strnlen_sm(const char *str, size_t maxsize)
 
     return n;
 }
+
+//
+//{
+//    struct timespec ts;
+//    if(clock_gettime(CLOCK_MONOTONIC,&ts) != 0) {
+//     //error
+//    }
+//}

@@ -21,5 +21,6 @@ struct CTask_to_handle
     CInteractor_ptr m_client;
 };
 
+std::string GetTickStr();
 
 #endif // COMMON_H_INCLUDED

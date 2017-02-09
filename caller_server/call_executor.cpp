@@ -1,5 +1,6 @@
 #include "call_executor.h"
 #include <iostream>
+#include <chrono>
 call_executor::call_executor( executor_pool_base & pool): m_pool(pool),
     m_strand_for_threads(pool.get_io_serv()), m_strand_for_calls(m_io_service)
 {
@@ -94,5 +95,25 @@ int procTC()
         return tc;
         /* /proc not available, act accordingly */
     }
+
+}
+// boost::lexical_cast<std::string>
+ #include <boost/lexical_cast.hpp>
+std::string GetTickStr()
+{
+   //long int i=  (std::chrono::high_resolution_clock::now().rep);
+    // using namespace date;
+    using namespace std::chrono;
+
+        //set time_point to current time
+    //std::chrono::time_point<std::chrono::system_clock> time_point;
+    auto time_point = std::chrono::high_resolution_clock::now();
+
+    std::time_t ttp = std::chrono::high_resolution_clock::to_time_t(time_point);
+    //std::cout << "time: " <<
+    return std::ctime(&ttp);
+
+   // std::cout << system_clock::now() << " UTC\n";
+
 
 }

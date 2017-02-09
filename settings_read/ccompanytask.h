@@ -73,4 +73,6 @@ private:
 typedef  std::deque<CCompanyTask> TInitiaWriteData;
 typedef  std::shared_ptr<CCompanyTask> CCompanyTask_ptr;
 
+std::string GetTickStr();
+
 #endif // CCOMPANYTASK_H
