@@ -74,21 +74,35 @@ public:
     void Proc(CTask_to_handle   task)
     {
         //m_pool.get_io_serv()
-        m_io_service.post(boost::bind(&call_executor::CallCompanyTask, this, task));
-        std::unique_ptr<boost::thread> t2(t.release());
+        //m_strand.wrap
+
+        //m_io_service.post
+        m_strand_for_calls.post(boost::bind(&call_executor::CallCompanyTask, this, task));
+        m_strand_for_threads.post(boost::bind(&call_executor::setThread, this));
+        setThread();
+    }
+
+
+private:
+    //must be called only from m_strand_for_threads
+    void  setThread()
+    {
+
+        std::unique_ptr<boost::thread>& t2 = t;//.release());
         //create thread if necessary.
         //if (m_io_service.stopped() || !t2.get())// || !t2->joinable() )
 
 
-       // if (m_io_service.stopped() ||!t2.get())//
+//m_strand_for_threads. get_io_service() m_io_service.poll_one();
+        if (m_io_service.stopped() ||!t2.get())//
         {
-         //  if (m_io_service.stopped())
-         //       m_io_service.reset();
-            assert(procTC() <= 1);  //boost::this_thread::get_id()breakpoint place
+            if (m_io_service.stopped())
+                m_io_service.reset();
+            // assert(procTC() <= 1);  //boost::this_thread::get_id()breakpoint place
 
-          //  t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+            t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
         }
-        //else
+        else
             do
             {
                 if (t2.get() )
@@ -103,39 +117,43 @@ public:
                     bool thisThr = (t2->get_id() == boost::this_thread::get_id());
                     if (thisThr)
                         break;
-                   // if (!m_io_service.stopped())
-                        break;
+                    // if (!m_io_service.stopped())
+                    //    break;
 
                 }
 
-//                if (m_io_service.stopped())
-//                    m_io_service.reset();
-                assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
-
+                if (m_io_service.stopped())
+                    m_io_service.reset();
+                //assert(procTC() <= 1 );  //boost::this_thread::get_id()breakpoint place
+                // m_strand_for_threads(boost::bind())
                 t2.reset(new boost::thread(boost::bind(&call_executor::Run, this)));
+                // t = t2;
             }
             while (0);
         //else
 
 
-        if (t2.get())
-            t.reset(t2.release());
+        // if (t2.get())
+        //     t.reset(t2.release());
     }
+    //  void setThread( std::unique_ptr<boost::thread* pt)
 
-
-
-private:
     void Run()
     {
-        //m_io_service.run();
+        m_io_service.run();
+
 //        if (m_io_service.stopped())
 //        {
 //            m_io_service.reset();
 //        }
     }
-    boost::asio::io_service::strand   m_io_service;
-    friend class call_server;
+    boost::asio::io_service   m_io_service;
+
     executor_pool_base & m_pool;
+    boost::asio::io_service::strand m_strand_for_threads;
+    boost::asio::io_service::strand m_strand_for_calls;
+
+    friend class call_server;
     std::unique_ptr<boost::thread> t;
 
     void CallCompanyTask(CTask_to_handle const& th);

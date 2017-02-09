@@ -1,6 +1,7 @@
 #include "call_executor.h"
 #include <iostream>
-call_executor::call_executor( executor_pool_base & pool): m_pool(pool)
+call_executor::call_executor( executor_pool_base & pool): m_pool(pool),
+    m_strand_for_threads(pool.get_io_serv()), m_strand_for_calls(m_io_service)
 {
     //ctor
 }
