@@ -211,19 +211,17 @@ private:
       static std::string m_addr;
        if ( !m_addr.empty())
             return m_addr;
-        try
-        {
+
+          boost::system::error_code ec;
             //  std::string s = tmp_ep.to_string(ec);
-            std::string s = boost::lexical_cast
-                            <std::string>( r_endpoint());
+        std::string s = boost::lexical_cast
+                            <std::string>( m_socket.socket().remote_endpoint(ec));
+            if (ec)
+                  s = "__";
+
             m_addr = s;
 
             return s;
-        }
-        catch(std::exception &e)
-        {
-            return "__";
-        }
     }
 
     std::mutex write_msg_mutex;
