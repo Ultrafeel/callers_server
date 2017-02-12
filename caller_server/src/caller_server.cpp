@@ -60,12 +60,14 @@ public:
     void leave()
     {
 
-        std::cout<< " Client"<<   "leave " << endl; //endpoint() <<
+        std::cout<< " Client"<< endpoint()  << "leave " << endl; // <<
         m_caller.leave(shared_from_this());
     }
     void start()
     {
         m_caller.join(shared_from_this());
+        std::cout<< " Client "<< endpoint()  << " join " << endl; // <<
+
         //boost::asio::
         async_read_msg();
     }
@@ -206,11 +208,15 @@ private:
     std::string endpoint()
     {
 
+      static std::string m_addr;
+       if ( !m_addr.empty())
+            return m_addr;
         try
         {
             //  std::string s = tmp_ep.to_string(ec);
             std::string s = boost::lexical_cast
                             <std::string>( r_endpoint());
+            m_addr = s;
 
             return s;
         }
