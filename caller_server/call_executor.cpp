@@ -97,23 +97,4 @@ int procTC()
     }
 
 }
-// boost::lexical_cast<std::string>
- #include <boost/lexical_cast.hpp>
-std::string GetTickStr()
-{
-   //long int i=  (std::chrono::high_resolution_clock::now().rep);
-    // using namespace date;
-    using namespace std::chrono;
 
-        //set time_point to current time
-    //std::chrono::time_point<std::chrono::system_clock> time_point;
-    auto time_point = std::chrono::high_resolution_clock::now();
-
-    std::time_t ttp = std::chrono::high_resolution_clock::to_time_t(time_point);
-    //std::cout << "time: " <<
-    return std::ctime(&ttp);
-
-   // std::cout << system_clock::now() << " UTC\n";
-
-
-}

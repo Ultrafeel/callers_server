@@ -166,7 +166,7 @@ private:
 
     void do_close()
     {
-        std::cout << " client closing " << std::endl;
+        std::cout << GetTickStr()<< " client closing " << std::endl;
         socket_.socket().close();
     }
 public:
