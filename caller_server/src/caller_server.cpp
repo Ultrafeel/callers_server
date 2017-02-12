@@ -96,7 +96,9 @@ public:
             if (!write_msgs_.empty())
             {
                 if (write_msgs_.front().isLastMark())
-                    cout <<  " No tasks left for:" << endpoint()<<endl;
+                    cout <<  "   >>No tasks left for:" << endpoint()<<endl;
+
+                std::cout << "  >>" <<__FUNCTION__ << GetTickStr() << ":addr:" << endpoint() <<" " <<  write_msgs_.front().message << std::endl;
 
                 m_socket.async_write(
                     write_msgs_.front(),//  boost::asio::buffer(write_msgs_.front().data(),
@@ -166,6 +168,11 @@ private:
                 //loop while write_msgs_ not empty
                 if (!write_msgs_.empty())
                 {
+                    if (isEnd)
+                         std::cout << __FUNCTION__ << GetTickStr() << ":addr:" << endpoint() <<": strange " << std::endl;
+                    else
+                         std::cout << "  <" <<__FUNCTION__ << GetTickStr() << ":addr:" << endpoint() <<" " << std::endl;
+
                     m_socket.async_write( write_msgs_.front(),//      boost::asio::buffer(write_msgs_.front().data(),
                                           //   write_msgs_.front().length()),
                                           boost::bind(&client_listen_session::handle_write, shared_from_this(),
