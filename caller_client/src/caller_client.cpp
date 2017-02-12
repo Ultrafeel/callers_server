@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
         std::cerr << "Connection to caller_server failed: " << e.what() << std::endl;
         return 1;
     }
-    cout << " execution ended successfully: enter any char"<< endl;
+    cout << " execution finished: enter any char"<< endl;
     std::getchar();
     return 0;
 }
