@@ -47,7 +47,7 @@ public:
                                                boost::asio::placeholders::error));
     }
 
-     void write(const TInitiaWriteData& msgs)
+    void write(const TInitiaWriteData& msgs)
     {
         io_service_.post(boost::bind(&Caller_client::do_write, this, boost::ref(msgs)));
     }
@@ -57,13 +57,35 @@ public:
         io_service_.post(boost::bind(&Caller_client::do_close, this));
     }
 
+
+    std::string local_endpoint_str()
+    {
+
+        static std::string m_addr;
+        if ( !m_addr.empty())
+            return m_addr;
+
+        boost::system::error_code ec ;
+        //  std::string s = tmp_ep.to_string(ec);
+        std::stringstream s;  //=boost::lexical_cast   <std::string>(
+        auto lep = socket_.socket().local_endpoint(ec);
+
+        if (ec)
+            s << "__";
+        else
+            s << lep;
+        m_addr = s.str();
+
+        return m_addr;
+    }
+
 private:
 
     void handle_connect(const boost::system::error_code& error)
     {
         if (!error)
         {
-            std::cout << " Connected " << std::endl;
+            std::cout << " Connected "  << local_endpoint_str() <<  std::endl;
             write(m_companiesToWrite);
         }
         else
@@ -166,7 +188,7 @@ private:
 
     void do_close()
     {
-        std::cout << GetTickStr()<< " client closing " << std::endl;
+        std::cout << GetTickStr()<< " client closing " << local_endpoint_str() << std::endl;
         socket_.socket().close();
     }
 public:
@@ -234,8 +256,8 @@ int main(int argc, char* argv[])
     CCompaniesReader cr(compTasks);
     if (!cr.OpenAndReadTasks())
     {
-         cout << " failed to parse " << compTasks << endl;
-         return 1;
+        cout << " failed to parse " << compTasks << endl;
+        return 1;
     }
 
     try
@@ -245,7 +267,7 @@ int main(int argc, char* argv[])
 
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(itServAddr->second, itPortStr->second);
-       // std::getchar();
+        // std::getchar();
         tcp::resolver::iterator iterator = resolver.resolve(query);
 
         Caller_client c(io_service, iterator);
