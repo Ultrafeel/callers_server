@@ -114,7 +114,7 @@ public:
         if (!error  )
         {
 
-            m_caller.deliver(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
+            m_caller.make_calls(*current_companyTask,CInteractor_ptr( this->shared_from_this()) );
             //async_read_msg();
             std::cout << __FUNCTION__ << " : Companies from " <<  endpoint() << " delivered" << std::endl;
             //m_socket.

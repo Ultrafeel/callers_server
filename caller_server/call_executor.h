@@ -195,7 +195,7 @@ public:
         return m_io_service;
     }
 
-    void deliver(TInitiaWriteData & msg, CInteractor_ptr client)
+    void make_calls(TInitiaWriteData & msg, CInteractor_ptr client)
     {
 
         CTask_to_handle task1;
