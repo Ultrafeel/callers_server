@@ -212,10 +212,11 @@ private:
     {
         return  m_socket.socket().remote_endpoint();
     }
+
+    std::string m_addr;
     std::string endpoint()
     {
 
-      static std::string m_addr;
        if ( !m_addr.empty())
             return m_addr;
 

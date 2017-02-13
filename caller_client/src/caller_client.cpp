@@ -58,11 +58,11 @@ public:
     }
 
 
+    std::string m_addr;
+
     std::string local_endpoint_str()
     {
-
-        static std::string m_addr;
-        if ( !m_addr.empty())
+       if ( !m_addr.empty())
             return m_addr;
 
         boost::system::error_code ec ;
