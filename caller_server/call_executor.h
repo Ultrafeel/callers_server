@@ -79,7 +79,7 @@ public:
         //m_io_service.post
         m_strand_for_calls.post(boost::bind(&call_executor::CallCompanyTask, this, task));
         m_strand_for_threads.post(boost::bind(&call_executor::setThread, this));
-        setThread();
+        //setThread();
     }
 
 
