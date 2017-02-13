@@ -59,7 +59,7 @@ public:
     virtual ~executor_pool_base()
     {}
     virtual boost::asio::io_service& get_io_serv() = 0;
-    virtual void CheckIfLeft(CInteractor_ptr client)  = 0;
+    virtual void CheckIfLeft(CTask_to_handle tsk)  = 0;
 };
 class call_executor
     : //public CInteractor,
@@ -209,10 +209,12 @@ public:
             while (!msg.empty())
             {
                 //CCompanyTask & comp :
-                read_queue.emplace(CTask_to_handle
+                read_queue.emplace(
+                    CTask_to_handle
                 {
                     CCompanyTask_ptr(new CCompanyTask(std::move(msg.front()))),
-                    client});
+                    client
+                });
                 msg.pop_front();
             }
             // emplace(CTask_to_handle{ msg, client});
@@ -220,28 +222,50 @@ public:
 
             task1 = read_queue.top();
             read_queue.pop();
+            m_incomplate.insert(task1);
         }
+
         m_call_executor.Proc(task1);
 
     }
-
-    void CheckIfLeft(CInteractor_ptr client) override
+    std::set<CTask_to_handle, CHandleTaskSorter> m_incomplate;
+    void CheckIfLeft(CTask_to_handle tsk) override
     {
+        m_io_service.post(boost::bind(&caller_executor_pool::CheckIfLeftAndLoadNext, this, tsk));
+    }
 
+    void CheckIfLeftAndLoadNext(CTask_to_handle tsk)
+    {
         bool tasks_left = false;
         {
-            std::lock_guard<std::mutex> lock(m_queue_m);
+            // std::lock_guard<std::mutex> lock(m_queue_m);
             for (CTask_to_handle const& thi : read_queue.GetCont())
             {
-                if (thi.m_client == client)//.get()
+                if (thi.m_client == tsk.m_client)//.get()
                 {
                     tasks_left= true;
                     break;
                 }
 
             }
+            if (!tasks_left)
+            {
+                auto ft =  m_incomplate.find(tsk);
+                if (ft!=m_incomplate.end())
+                    m_incomplate.erase(tsk);
+                for(CTask_to_handle const& th : m_incomplate)
+                {
+                    if (th.m_client == tsk.m_client)
+                    {
+                        tasks_left = true;
+
+                        break;
+                    }
+                }
+            }
 
         }
+        CInteractor_ptr  client = tsk.m_client;
         if (!tasks_left)
         {
 
@@ -257,25 +281,29 @@ public:
 
 
         }
+        load_next_task(client);
+    }
 
-        //load next
+    void load_next_task(CInteractor_ptr client)
+    {
+
+        std::lock_guard<std::mutex> lock(m_queue_m);
+
+        if (!read_queue.empty())
         {
 
-            std::lock_guard<std::mutex> lock(m_queue_m);
 
-            if (!read_queue.empty())
-            {
+            CTask_to_handle task1 =  read_queue.top();
+            read_queue.pop();
+            m_incomplate.insert(task1);
 
-
-                CTask_to_handle task1 =  read_queue.top();
-                read_queue.pop();
-
-                m_call_executor.Proc(task1);
-            }
-            // else
-            // {   assert(task
-
+            m_call_executor.Proc(task1);
+            // CheckIfLeftAndLoadNext(task1.m_client);
         }
+        // else
+        // {   assert(task
+
+
 
 
 //        recent_msgs_.push_back(msg);
