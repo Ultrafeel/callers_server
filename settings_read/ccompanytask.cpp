@@ -83,8 +83,10 @@ std::string GetTickStr()
 
     std::time_t ttp = std::chrono::high_resolution_clock::to_time_t(time_point);
     //std::cout << "time: " <<
-    return std::ctime(&ttp);
-
+    std::string str = std::ctime(&ttp);
+    std::string  str2(str.c_str(), std::max(1ul, str.length()) - 1);
+   // str += "_";
+    return str2;
    // std::cout << system_clock::now() << " UTC\n";
 
 
