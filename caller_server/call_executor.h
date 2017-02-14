@@ -254,7 +254,7 @@ public:
     {
         bool tasks_left = false;
         {
-            // std::lock_guard<std::mutex> lock(m_queue_m);
+            std::lock_guard<std::mutex> lock(m_queue_m);
             for (CTask_to_handle const& thi : read_queue.GetCont())
             {
                 if (thi.m_client == tsk.m_client)//.get()
