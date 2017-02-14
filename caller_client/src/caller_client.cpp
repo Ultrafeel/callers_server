@@ -85,7 +85,7 @@ private:
     {
         if (!error)
         {
-            std::cout << " Connected "  << local_endpoint_str() <<  std::endl;
+            std::cout << " Connected . My address|port:"  << local_endpoint_str() <<  std::endl;
             write(m_companiesToWrite);
         }
         else
