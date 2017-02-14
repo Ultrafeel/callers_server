@@ -238,13 +238,13 @@ public:
 
             task1 = read_queue.top();
             read_queue.pop();
-            m_incomplate.insert(task1);
+            m_incomplete.insert(task1);
         }
 
         m_call_executor.Proc(task1);
 
     }
-    std::set<CTask_to_handle, CHandleTaskSorter> m_incomplate;
+    std::set<CTask_to_handle, CHandleTaskSorter> m_incomplete;
     void CheckIfLeft(CTask_to_handle tsk) override
     {
         m_io_service.post(boost::bind(&caller_executor_pool::CheckIfLeftAndLoadNext, this, tsk));
@@ -264,12 +264,12 @@ public:
                 }
 
             }
-                auto ft =  m_incomplate.find(tsk);
-                if (ft!=m_incomplate.end())
-                    m_incomplate.erase(tsk);
-           if (!tasks_left)
+            auto ft =  m_incomplete.find(tsk);
+            if (ft!=m_incomplete.end())
+                m_incomplete.erase(tsk);
+            if (!tasks_left)
             {
-                 for(CTask_to_handle const& th : m_incomplate)
+                for(CTask_to_handle const& th : m_incomplete)
                 {
                     if (th.m_client == tsk.m_client)
                     {
@@ -311,7 +311,7 @@ public:
 
             CTask_to_handle task1 =  read_queue.top();
             read_queue.pop();
-            m_incomplate.insert(task1);
+            m_incomplete.insert(task1);
 
             m_call_executor.Proc(task1);
             // CheckIfLeftAndLoadNext(task1.m_client);
