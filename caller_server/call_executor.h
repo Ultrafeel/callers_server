@@ -28,14 +28,23 @@ struct CompaniesSorter
 {
     bool operator () (CCompanyTask const & t1, CCompanyTask const & t2) const
     {
-        if (t1.m_priority < t2.m_priority)
-            return true;
+        return (compar(t1, t2) > 0);
+    }
+//protected:
+    int compar (CCompanyTask const & t1, CCompanyTask const & t2) const
+    {
+         if (t1.m_priority < t2.m_priority)
+            return 1;
         else if(t1.m_priority != t2.m_priority)
-            return false;
+            return 0;
         else
         {
-            bool result = (t1.m_abonents.size() > t2.m_abonents.size());
-            return result;
+            if (t1.m_abonents.size() > t2.m_abonents.size())
+                return 1;
+            else if (t1.m_abonents.size() != t2.m_abonents.size())
+                return -1;
+            else
+                return 0;
         }
     }
 };
@@ -44,7 +53,14 @@ struct CHandleTaskSorter
 {
     bool operator () (CTask_to_handle const & t1, CTask_to_handle const & t2) const
     {
-        return m_cs(*t1.m_task, *t2.m_task);
+        //return m_cs(*t1.m_task, *t2.m_task);
+        int c = m_cs.compar(*t1.m_task, *t2.m_task);
+        if (c > 0)
+            return true;
+        else if (0 != c)
+            return false;
+        else
+            return (t1.m_client.get() > t2.m_client.get());
     }
 private:
     CompaniesSorter m_cs;
