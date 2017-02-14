@@ -264,12 +264,12 @@ public:
                 }
 
             }
-            if (!tasks_left)
-            {
                 auto ft =  m_incomplate.find(tsk);
                 if (ft!=m_incomplate.end())
                     m_incomplate.erase(tsk);
-                for(CTask_to_handle const& th : m_incomplate)
+           if (!tasks_left)
+            {
+                 for(CTask_to_handle const& th : m_incomplate)
                 {
                     if (th.m_client == tsk.m_client)
                     {
