@@ -256,12 +256,16 @@ private:
     void CheckIfLeftAndLoadNext(CTask_to_handle tsk)
     {
         bool tasks_left = false;
+        bool tasks_left_inc = false;
+
+        CTask_to_handle tskLeft ;
         {
             std::lock_guard<std::mutex> lock(m_queue_m);
             for (CTask_to_handle const& thi : read_queue.GetCont())
             {
                 if (thi.m_client == tsk.m_client)//.get()
                 {
+                    tskLeft = thi;
                     tasks_left= true;
                     break;
                 }
@@ -276,8 +280,10 @@ private:
                 {
                     if (th.m_client == tsk.m_client)
                     {
-                        tasks_left = true;
+                        tskLeft = th;
 
+                        tasks_left = true;
+                        tasks_left_inc  = true;
                         break;
                     }
                 }
@@ -296,6 +302,7 @@ private:
         }
         else
         {
+            std::cout << "  __" << __FUNCTION__<< " left " << tskLeft.m_task->m_comp_name << " inc " << tasks_left_inc<< std::endl;
             client->deliver(CServerStatus("Have some your tasks"));
 
 
@@ -407,7 +414,7 @@ private:
                 std::make_heap(cont.begin(), cont.end(), comp);//maybe useless
 
         }
-     };
+    };
     UnProtectCont read_queue;
 
 
