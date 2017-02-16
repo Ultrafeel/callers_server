@@ -3,7 +3,8 @@
 
 #include <cserverstatus.h>
 #include "ccompanytask.h"
-class CInteractor
+class CInteractor:
+    public boost::enable_shared_from_this<CInteractor>
 {
 public:
     virtual ~CInteractor() {}

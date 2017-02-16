@@ -42,16 +42,22 @@ using boost::asio::ip::tcp;
 //----------------------------------------------------------------------
 
 class client_listen_session
-    : public CInteractor,
-      public boost::enable_shared_from_this<client_listen_session>
+    : public CInteractor
+   // ,  public boost::enable_shared_from_this<client_listen_session>
 {
 public:
+
+    boost::shared_ptr<client_listen_session> shared_from_this()
+    {
+        return static_pointer_cast<client_listen_session >( CInteractor::shared_from_this());
+    }
     client_listen_session(boost::asio::io_service& io_service, caller_executor_pool& room)
         : m_socket(io_service),
           m_caller(room)
     {
     }
-
+    ~client_listen_session()
+    {}
     tcp::socket& socket()
     {
         return m_socket.socket();
@@ -77,7 +83,9 @@ public:
         m_socket.async_read(*current_companyTask,
                             // boost::asio::buffer(read_msg_.data(), chat_message::header_length),
                             boost::bind(
-                                &client_listen_session::handle_read_company, shared_from_this(),
+                                &client_listen_session::handle_read_company,
+
+                                static_pointer_cast<client_listen_session >( shared_from_this()),
                                 boost::asio::placeholders::error));
     }
 
@@ -237,7 +245,7 @@ private:
     server_status_queue write_msgs_;
 };
 
-typedef boost::shared_ptr<client_listen_session> chat_session_ptr;
+typedef boost::shared_ptr<CInteractor> chat_session_ptr;//client_listen_session
 
 //----------------------------------------------------------------------
 
@@ -255,7 +263,10 @@ public:
 
     void start_accept()
     {
-        chat_session_ptr new_session(new client_listen_session(io_service_, m_callers_pool));
+        chat_session_ptr new_session1(new client_listen_session(io_service_, m_callers_pool));
+          auto new_session =  static_pointer_cast<client_listen_session >(new_session1);
+
+
         acceptor_.async_accept(new_session->socket(),
                                boost::bind(&call_server::handle_accept, this, new_session,
                                            boost::asio::placeholders::error));
@@ -266,7 +277,7 @@ public:
     {
         if (!error)
         {
-            session->start();
+            static_pointer_cast<client_listen_session >(session)->start();
         }
         else
         {
