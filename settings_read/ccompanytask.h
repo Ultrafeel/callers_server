@@ -26,6 +26,10 @@ public:
 
 struct TCompanyTask
 {
+     TCompanyTask(TCompanyTask &&) = default;
+     TCompanyTask(TCompanyTask const&) = default;
+    TCompanyTask() = default;
+
     std::string  m_comp_name;
     uint16_t     m_priority;
     std::string  m_advertise;
@@ -35,6 +39,7 @@ struct TCompanyTask
 class CCompanyTask : public TCompanyTask
 {
 public:
+    CCompanyTask(CCompanyTask &&) = default;
     static char const * getTerminatedName()
     {
         return "\n No more Companies";
