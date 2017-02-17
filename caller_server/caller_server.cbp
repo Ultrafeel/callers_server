@@ -34,6 +34,24 @@
 					<Variable name="currconf" value="Release" />
 				</Environment>
 			</Target>
+			<Target title="Debug2">
+				<Option output="bin/Debug/caller_server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add directory="/usr/lib/debug/usr/lib/x86_64-linux-gnu" />
+					<Add directory="/usr/lib/debug/lib/x86_64-linux-gnu" />
+					<Add directory="/usr/lib/x86_64-linux-gnu/debug" />
+				</Linker>
+				<Environment>
+					<Variable name="currconf" value="Debug" />
+				</Environment>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -68,7 +86,9 @@
 			<code_completion />
 			<envvars />
 			<lib_finder disable_auto="1" />
-			<debugger />
+			<debugger>
+				<search_path add="/usr/include/c++/5" />
+			</debugger>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
