@@ -1,0 +1,26 @@
+﻿IDE: Code::blocks
+c++11
+gcc-5.4.0
+kernel:
+4.4.0-53-generic
+
+Использованные библиотеки
+
+boost 1.63.0
+boost asio
+pthread
+boost_serialization
+boost_thread
+boost regex
+boost_chrono
+boost_system
+
+Помещал boost в 
+/usr/share/boost_extr/boost_1_63_0/
+/usr/share/boost_extr/boost_1_63_0/stage/lib
+
+Собирал boost:
+./b2 variant=debug debug-symbols=on --with-serialization --with-thread --with-system --with-regex  --with-chrono
+
+Возможно, надо было timeout для установления подключения, но не успел.
+
