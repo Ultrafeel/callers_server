@@ -1,3 +1,4 @@
+
 1. The essence of the task.
 
 Implement the system - outgoing call generator (hereinafter referred to as IO).
@@ -7,6 +8,8 @@ The server is responsible for call logic and outgoing call implementation.
 The client has an interface for managing the creation and launch of call campaigns. The real-time client displays information about the current status of the campaign that is currently running.
 
 2. Requirements for implementation of the client part.
+
+2.0 Use BOOST ASIO
 
 2.1. When loading, the client opens the configuration file and reads the server connection parameters if the file is not available or has the wrong format - reports this with an alarm message and stops working, otherwise the transition to paragraph 2.2.
 
